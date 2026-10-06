@@ -5,7 +5,7 @@
 .DS_Store
 samconfig.toml
 docs/
-!backend/docs/
+
 AGENTS.md
 __pycache__/
 *.pyc
