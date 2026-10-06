@@ -1,0 +1,8 @@
+.aws-sam/
+.env
+*.pem
+*.key
+.DS_Store
+samconfig.toml
+docs/
+AGENTS.md
