@@ -14,6 +14,11 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   amazon_cognito_identity_dart_2: ^3.3.0
   uuid: ^4.0.0
+  camera: ^0.10.5+9
+  geolocator: ^10.1.0
+  permission_handler: ^11.3.0
+  sensors_plus: ^5.0.0
+  flutter_image_compress: ^2.2.0
 
 dev_dependencies:
   flutter_test:
