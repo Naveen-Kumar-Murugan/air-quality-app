@@ -28,6 +28,16 @@ class ApiClient {
     ));
   }
 
+  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? queryParams}) async {
+    final response = await _dio.get(path, queryParameters: queryParams);
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> post(String path, Map<String, dynamic> data) async {
+    final response = await _dio.post(path, data: data);
+    return response.data;
+  }
+
   Future<Map<String, dynamic>> getMe() async {
     final response = await _dio.get('/me');
     return response.data;

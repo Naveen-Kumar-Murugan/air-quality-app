@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'features/auth/auth_service.dart';
 import 'core/api_client.dart';
+import 'features/scan/scan_screen.dart';
+import 'features/scan/history_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -115,35 +117,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
+  final List<Widget> _screens = [
+    const ScanScreen(),
+    const PlaceholderScreen(title: 'Map', icon: Icons.map),
+    const HistoryScreen(),
+    const PlaceholderScreen(title: 'Coach', icon: Icons.chat),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Air Quality'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _getIcon(_currentIndex),
-              size: 120,
-              color: Theme.of(context).colorScheme.primary,
+      appBar: _currentIndex == 0 || _currentIndex == 2
+          ? null
+          : AppBar(
+              title: Text(_getTitle(_currentIndex)),
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Phase 1 Complete! ✓',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Auth successful - ready for Phase 2',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
-        ),
-      ),
+      body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -151,20 +141,66 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Scan'),
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.route), label: 'Route'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Coach'),
         ],
       ),
     );
   }
 
-  IconData _getIcon(int index) {
+  String _getTitle(int index) {
     switch (index) {
-      case 0: return Icons.camera_alt;
-      case 1: return Icons.map;
-      case 2: return Icons.route;
-      case 3: return Icons.chat;
-      default: return Icons.camera_alt;
+      case 0:
+        return 'Scan';
+      case 1:
+        return 'Map';
+      case 2:
+        return 'History';
+      case 3:
+        return 'Coach';
+      default:
+        return 'Air Quality';
     }
+  }
+}
+
+class PlaceholderScreen extends StatelessWidget {
+  final String title;
+  final IconData icon;
+
+  const PlaceholderScreen({
+    Key? key,
+    required this.title,
+    required this.icon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 120,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            '$title - Coming Soon',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'This feature will be available in Phase ${title == 'Map' ? '3' : '4'}',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey.shade500,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }
