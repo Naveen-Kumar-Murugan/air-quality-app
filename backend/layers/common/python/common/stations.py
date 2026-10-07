@@ -114,14 +114,7 @@ async def get_nearest_station(
             if st_lat is None or st_lon is None:
                 continue
 
-            pm25_val = None
-            for p in st.get("parameters", []):
-                param_name = str(p.get("parameter", "")).lower()
-                if param_name in ("pm25", "pm2.5"):
-                    val = p.get("lastValue") if p.get("lastValue") is not None else p.get("value")
-                    if val is not None:
-                        pm25_val = float(val)
-                        break
+            pm25_val = st.get("pm25")
 
             if pm25_val is None:
                 continue
