@@ -59,28 +59,91 @@ async def fetch_openaq_stations(
     lon: float | None = None,
     bbox: tuple[float, float, float, float] | None = None,
 ) -> list[dict]:
-    url = "https://api.openaq.org/v2/locations"
+    """
+    Fetch air quality stations with PM2.5 data using OpenAQ v3 API.
+    
+    Uses /locations/{id}/latest endpoint to get both location info and latest PM2.5
+    measurements efficiently, filtering only PM2.5 parameter (id=2).
+    """
+    locations_url = "https://api.openaq.org/v3/locations"
+
     if bbox is not None:
-        params = {"bbox": f"{bbox[1]},{bbox[0]},{bbox[3]},{bbox[2]}", "parameter": "pm25", "limit": 100}
+        params = {
+            "bbox": f"{bbox[1]},{bbox[0]},{bbox[3]},{bbox[2]}",
+            "parameters_id": 2,
+            "limit": 100,
+        }
     elif lat is not None and lon is not None:
-        params = {"coordinates": f"{lat},{lon}", "radius": 15000, "parameter": "pm25", "limit": 100}
+        params = {
+            "coordinates": f"{lat},{lon}",
+            "radius": 15000,
+            "parameters_id": 2,
+            "limit": 100,
+        }
     else:
         return []
 
-    headers = {}
-    api_key = get_openaq_api_key()
-    if api_key:
-        headers["X-API-Key"] = api_key
+    headers = {
+        "X-API-Key": get_openaq_api_key(),
+    }
 
-    async with httpx.AsyncClient(timeout=3.0) as client:
-        for attempt in range(2):
-            try:
-                resp = await client.get(url, params=params, headers=headers)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    return data.get("results", [])
-            except Exception as e:
-                if attempt == 1:
-                    logger.error(f"OpenAQ API error: {e}")
-                    return []
-    return []
+    results = []
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            locations_resp = await client.get(
+                locations_url,
+                params=params,
+                headers=headers,
+            )
+            locations_resp.raise_for_status()
+            locations = locations_resp.json().get("results", [])
+            for location in locations:
+                location_id = location.get("id")
+                coordinates = location.get("coordinates") or {}
+                lat_val = coordinates.get("latitude")
+                lon_val = coordinates.get("longitude")
+
+                if lat_val is None or lon_val is None:
+                    continue
+
+                try:
+                    latest_url = f"https://api.openaq.org/v3/locations/{location_id}/latest"
+                    latest_resp = await client.get(
+                        latest_url,
+                        params={"parameters_id": 2}, 
+                        headers=headers,
+                    )
+                    latest_resp.raise_for_status()
+                    latest_results = latest_resp.json().get("results", [])
+                    pm25_value = None
+                    measurement_datetime = None
+
+                    for measurement in latest_results:
+                        if measurement.get("sensorsId") is not None:
+                            pm25_value = measurement.get("value")
+                            measurement_datetime = measurement.get("datetime")
+                            break
+
+                    if pm25_value is not None:
+                        results.append({
+                            "id": location_id,
+                            "name": location.get("name"),
+                            "coordinates": {
+                                "latitude": lat_val,
+                                "longitude": lon_val,
+                            },
+                            "pm25": pm25_value,
+                            "datetime": measurement_datetime,
+                        })
+                except httpx.HTTPError as e:
+                    logger.warning(
+                        f"Failed to fetch latest data for location {location_id}: {e}"
+                    )
+                    continue
+
+    except httpx.HTTPError as e:
+        logger.error(f"OpenAQ API error: {e}")
+        return []
+
+    return results
