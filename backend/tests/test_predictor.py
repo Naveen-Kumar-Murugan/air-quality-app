@@ -2,7 +2,7 @@ import os
 import sys
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common","common"))
 
 from common.predictor import StubPredictor, SageMakerPredictor, get_predictor, Prediction
 
