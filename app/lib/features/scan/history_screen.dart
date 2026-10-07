@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../scan_service.dart';
-import '../../auth/auth_service.dart';
+import 'scan_service.dart';
+import '../auth/auth_service.dart';
 import '../../core/api_client.dart';
 import 'widgets/aqi_chip.dart';
 import 'widgets/confidence_indicator.dart';
