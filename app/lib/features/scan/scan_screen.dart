@@ -1,14 +1,12 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:async';
 import 'dart:typed_data';
-import '../scan_service.dart';
-import '../../auth/auth_service.dart';
+import 'scan_service.dart';
+import '../auth/auth_service.dart';
 import '../../core/api_client.dart';
 import 'result_screen.dart';
 
@@ -25,8 +23,6 @@ class _ScanScreenState extends State<ScanScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
   String? _selectedTag;
-  double? _currentPressure;
-  StreamSubscription? _pressureSubscription;
 
   final List<String> _tags = [
     'roadside',
@@ -39,28 +35,12 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
     _initializeCamera();
-    _startPressureListener();
   }
 
   @override
   void dispose() {
     _cameraController?.dispose();
-    _pressureSubscription?.cancel();
     super.dispose();
-  }
-
-  Future<void> _startPressureListener() async {
-    try {
-      _pressureSubscription = barometerEventStream().listen((event) {
-        if (mounted) {
-          setState(() {
-            _currentPressure = event.pressure;
-          });
-        }
-      });
-    } catch (e) {
-      _currentPressure = null;
-    }
   }
 
   Future<void> _initializeCamera() async {
@@ -161,7 +141,7 @@ class _ScanScreenState extends State<ScanScreen> {
         lat: position.latitude,
         lon: position.longitude,
         accuracy: position.accuracy,
-        pressure: _currentPressure,
+        pressure: null,
         tag: _selectedTag,
         timestamp: DateTime.now(),
       );

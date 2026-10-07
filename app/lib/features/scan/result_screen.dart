@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../scan_service.dart';
+import 'scan_service.dart';
 import 'widgets/aqi_chip.dart';
 import 'widgets/confidence_indicator.dart';
 
