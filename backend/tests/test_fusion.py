@@ -2,7 +2,7 @@ import os
 import sys
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common"))
 
 from common.fusion import fuse_predictions
 from common.predictor import Prediction

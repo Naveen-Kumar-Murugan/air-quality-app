@@ -4,7 +4,7 @@ import sys
 import os
 
 # Add the common layer to the path so imports work outside Lambda
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common"))
 
 from common.geohash import encode, decode_bbox, neighbors, cells_covering
 

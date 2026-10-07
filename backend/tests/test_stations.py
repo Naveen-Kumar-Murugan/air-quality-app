@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common"))
 
 from common.stations import get_nearest_station, haversine
 
