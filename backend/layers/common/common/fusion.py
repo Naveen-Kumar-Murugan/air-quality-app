@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import math
-from common.aqi import aqi_to_category
-from common.predictor import Prediction
+from backend.layers.common.common.aqi import aqi_to_category
+from backend.layers.common.common.predictor import Prediction
 
 
 def fuse_predictions(

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import httpx
-from common.util import get_logger
+from backend.layers.common.common.util import get_logger
 
 logger = get_logger(__name__)
 

@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 from typing import Protocol
 
-from common.aqi import aqi_to_category
+from backend.layers.common.common.aqi import aqi_to_category
 
 
 @dataclass
