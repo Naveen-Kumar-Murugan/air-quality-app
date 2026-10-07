@@ -194,6 +194,87 @@ Resources:
       Timeout: 3
       MemorySize: 128
 
+  UploadUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/upload_url/
+      Handler: app.handler
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ScansBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RateLimitsTable
+      Events:
+        UploadUrlApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /scans/upload-url
+            Method: post
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Environment:
+        Variables:
+          SCANS_BUCKET: !Ref ScansBucket
+          RATE_LIMITS_TABLE: !Ref RateLimitsTable
+
+  ScanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/scan/
+      Handler: app.handler
+      Timeout: 30
+      MemorySize: 512
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref ScansBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ScansTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GeoCellsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StationsTable
+      Events:
+        ScanApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /scans
+            Method: post
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Environment:
+        Variables:
+          SCANS_TABLE: !Ref ScansTable
+          GEOCELLS_TABLE: !Ref GeoCellsTable
+          STATIONS_TABLE: !Ref StationsTable
+          SCANS_BUCKET: !Ref ScansBucket
+
+  ScansMineFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/scans_mine/
+      Handler: app.handler
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ScansTable
+      Events:
+        ScansMineApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /scans/mine
+            Method: get
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Environment:
+        Variables:
+          SCANS_TABLE: !Ref ScansTable
+
   PreSignupPermission:
     Type: AWS::Lambda::Permission
     Properties:
