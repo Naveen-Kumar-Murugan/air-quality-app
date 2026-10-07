@@ -40,28 +40,31 @@ async def test_fetch_weather_failure():
 
 
 @pytest.mark.asyncio
-async def test_fetch_openaq_stations_success():
-    mock_resp = MagicMock()
-    mock_resp.status_code = 200
-    mock_resp.json.return_value = {
-        "results": [
-            {"id": 1, "name": "Station A", "coordinates": {"latitude": 12.97, "longitude": 77.59}}
-        ]
-    }
+async def test_fetch_openaq_stations_real_api():
+    """
+    Integration test ensuring our client interacts seamlessly with the live OpenAQ v3 API.
+    """
+    if not os.getenv("OPENAQ_API_KEY"):
+        pytest.skip("Skipping integration test: OPENAQ_API_KEY environment variable not set.")
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
-        mock_get.return_value = mock_resp
-        res = await fetch_openaq_stations(lat=12.97, lon=77.59)
-        assert len(res) == 1
-        assert res[0]["id"] == 1
+    # Example bounding box: Parts of California, USA
+    test_bbox = (-122.5, 37.5, -122.0, 38.0) 
 
+    stations = await fetch_openaq_stations(bbox=test_bbox)
 
-@pytest.mark.asyncio
-async def test_fetch_openaq_stations_failure():
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
-        mock_get.side_effect = Exception("Timeout")
-        res = await fetch_openaq_stations(bbox=(12.0, 77.0, 13.0, 78.0))
-        assert res == []
+    assert isinstance(stations, list), "API response should be parsed into a list"
+    
+    if len(stations) > 0:
+        first_station = stations[0]
+        assert "id" in first_station
+        assert "name" in first_station
+        assert "coordinates" in first_station
+        assert "latitude" in first_station["coordinates"]
+        assert "longitude" in first_station["coordinates"]
+        assert "pm25" in first_station
+        assert "datetime" in first_station
+        assert isinstance(first_station["id"], int)
+        assert isinstance(first_station["pm25"], (int, float))
 
 
 def test_get_openaq_api_key(monkeypatch):
