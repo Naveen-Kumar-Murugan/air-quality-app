@@ -3,6 +3,7 @@ import 'features/auth/auth_service.dart';
 import 'core/api_client.dart';
 import 'features/scan/scan_screen.dart';
 import 'features/scan/history_screen.dart';
+import 'features/map/map_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -119,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const ScanScreen(),
-    const PlaceholderScreen(title: 'Map', icon: Icons.map),
+    const MapScreen(),
     const HistoryScreen(),
     const PlaceholderScreen(title: 'Coach', icon: Icons.chat),
   ];
@@ -127,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _currentIndex == 0 || _currentIndex == 2
+      appBar: _currentIndex == 0 || _currentIndex == 1 || _currentIndex == 2
           ? null
           : AppBar(
               title: Text(_getTitle(_currentIndex)),

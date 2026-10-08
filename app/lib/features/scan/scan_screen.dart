@@ -9,6 +9,7 @@ import 'scan_service.dart';
 import '../auth/auth_service.dart';
 import '../../core/api_client.dart';
 import 'result_screen.dart';
+import '../map/map_service.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({Key? key}) : super(key: key);
@@ -151,6 +152,7 @@ class _ScanScreenState extends State<ScanScreen> {
       Navigator.of(context).pop();
 
       if (mounted) {
+        notifyMapRefresh();
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ResultScreen(result: result),
