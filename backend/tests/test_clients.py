@@ -3,7 +3,7 @@ import sys
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common"))
 
 from common.clients import fetch_weather, fetch_openaq_stations, get_openaq_api_key, _OPENAQ_API_KEY
 

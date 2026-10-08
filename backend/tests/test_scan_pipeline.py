@@ -1,14 +1,16 @@
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common","common"))
 
 import json
 import base64
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import MagicMock, patch, AsyncMock
 import boto3
 import pytest
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "functions", "upload_url"))
 import importlib.util
@@ -136,3 +138,68 @@ def test_scans_mine_empty():
         body = json.loads(resp["body"])
         assert body["scans"] == []
         assert body["nextPageToken"] is None
+
+
+def run_scan_with_full_mocks(body):
+    event = make_event(sub="user1", body=body)
+    with patch("boto3.resource") as mock_res, patch("boto3.client") as mock_client:
+        mock_client.return_value.head_object.return_value = {"ContentLength": 1024}
+        mock_client.return_value.get_object.return_value = {"Body": MagicMock(read=lambda: b"img")}
+        mock_table = MagicMock()
+        mock_table.get_item.return_value = {"Item": None}
+        mock_res.return_value.Table.side_effect = lambda name: mock_table if name in ("ScansTable", "GeoCellsTable", "StationsTable") else MagicMock()
+        with patch("common.predictor.get_predictor") as mock_pred:
+            pred_inst = AsyncMock()
+            pred_inst.predict.return_value = MagicMock(aqi=50, category="Good", confidence=0.5, source="station_stub", probabilities=None)
+            mock_pred.return_value = pred_inst
+            with patch("common.clients.fetch_weather", new_callable=AsyncMock) as mock_weather:
+                mock_weather.return_value = {"humidity": 50, "wind_speed": 2.0}
+                with patch("common.stations.get_nearest_station", new_callable=AsyncMock) as mock_station:
+                    mock_station.return_value = {"aqi": 60, "distance_km": 5.0}
+                    resp = scan_handler(event, None)
+    return resp, mock_table
+
+
+def test_scan_naive_ist_timestamp_accepted():
+    body = {
+        "scanId": "testNaiveIST",
+        "s3Key": "scans/user1/testNaiveIST.jpg",
+        "lat": 12.0,
+        "lon": 77.0,
+        "accuracy": 150,
+        "timestamp": datetime.now(IST).isoformat(),
+    }
+    resp, mock_table = run_scan_with_full_mocks(body)
+    assert resp["statusCode"] == 200
+    saved_item = mock_table.put_item.call_args.kwargs["Item"]
+    assert saved_item["timestamp"].endswith("+05:30")
+
+
+def test_scan_utc_timestamp_converted_to_ist():
+    body = {
+        "scanId": "testUtc",
+        "s3Key": "scans/user1/testUtc.jpg",
+        "lat": 12.0,
+        "lon": 77.0,
+        "accuracy": 150,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    resp, mock_table = run_scan_with_full_mocks(body)
+    assert resp["statusCode"] == 200
+    saved_item = mock_table.put_item.call_args.kwargs["Item"]
+    assert saved_item["timestamp"].endswith("+05:30")
+
+
+def test_scan_expired_timestamp_rejected():
+    body = {
+        "scanId": "testExpired",
+        "s3Key": "scans/user1/testExpired.jpg",
+        "lat": 12.0,
+        "lon": 77.0,
+        "accuracy": 150,
+        "timestamp": (datetime.now(IST) - timedelta(hours=2)).isoformat(),
+    }
+    resp, _ = run_scan_with_full_mocks(body)
+    assert resp["statusCode"] == 400
+    body_json = json.loads(resp["body"])
+    assert "timestamp out of allowed range" in body_json.get("message", "")

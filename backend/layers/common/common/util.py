@@ -107,17 +107,32 @@ def generate_ulid() -> str:
 def get_logger(name: str) -> logging.Logger:
     """Return a JSON-structured logger configured for Lambda / CloudWatch."""
     logger = logging.getLogger(name)
+    log_level = os.environ.get("LOG_LEVEL", "DEBUG").upper()
+    logger.setLevel(log_level)
+    
     if not logger.handlers:
         handler = logging.StreamHandler()
-        handler.setFormatter(
-            logging.Formatter(
-                '{"level":"%(levelname)s","logger":"%(name)s","message":"%(message)s"}'
-            )
-        )
+        handler.setLevel(logging.DEBUG) 
+        class JsonExtraFormatter(logging.Formatter):
+            def format(self, record):
+                standard_attrs = {
+                    'args', 'asctime', 'created', 'exc_info', 'filename', 'funcName',
+                    'levelname', 'levelno', 'lineno', 'module', 'msecs', 'message',
+                    'msg', 'name', 'pathname', 'process', 'processName', 'relativeCreated',
+                    'stack_info', 'thread', 'threadName'
+                }
+                log_data = {
+                    "level": record.levelname,
+                    "logger": record.name,
+                    "message": record.getMessage()
+                }
+                extra_data = {k: v for k, v in record.__dict__.items() if k not in standard_attrs}
+                log_data.update(extra_data)
+                return json.dumps(log_data)
+        handler.setFormatter(JsonExtraFormatter())
         logger.addHandler(handler)
-    logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
+        
     return logger
-
 
 # ---------------------------------------------------------------------------
 # Private helpers

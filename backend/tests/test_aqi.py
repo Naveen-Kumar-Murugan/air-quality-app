@@ -3,7 +3,7 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "layers", "common"))
 
 from common.aqi import pm25_to_aqi, aqi_to_category, CLASS_MIDPOINTS
 

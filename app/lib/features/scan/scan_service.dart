@@ -118,8 +118,13 @@ class ScanSubmission {
       'accuracy': accuracy,
       if (pressure != null) 'pressure': pressure,
       if (tag != null) 'tag': tag,
-      'timestamp': timestamp.toIso8601String(),
+      'timestamp': _toIstIso(timestamp),
     };
+  }
+
+  String _toIstIso(DateTime time) {
+    final ist = time.toUtc().add(const Duration(hours: 5, minutes: 30));
+    return '${ist.toIso8601String().replaceFirst('Z', '')}+05:30';
   }
 }
 

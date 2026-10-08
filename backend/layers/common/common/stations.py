@@ -9,10 +9,10 @@ from typing import Any
 import boto3
 from boto3.dynamodb.conditions import Key
 
-from common import geohash
-from common.aqi import pm25_to_aqi
-from common.clients import fetch_openaq_stations
-from common.util import float_to_decimal, get_logger
+from . import geohash
+from .aqi import pm25_to_aqi
+from .clients import fetch_openaq_stations
+from .util import float_to_decimal, get_logger
 
 logger = get_logger(__name__)
 
