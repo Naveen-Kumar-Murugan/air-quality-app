@@ -335,3 +335,9 @@ Outputs:
   Region:
     Description: AWS Region
     Value: !Ref AWS::Region
+  ModelsBucketName:
+    Description: S3 bucket for ML model artifacts
+    Value: !Ref ModelsBucket
+  SageMakerEndpointName:
+    Description: SageMaker endpoint name for AQI sky classifier
+    Value: !Ref SageMakerEndpointName
