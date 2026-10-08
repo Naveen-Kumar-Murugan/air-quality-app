@@ -16,6 +16,12 @@ Globals:
         RATELIMITS_TABLE: !Ref RateLimitsTable
         SCANS_BUCKET: !Ref ScansBucket
 
+Parameters:
+  SageMakerEndpointName:
+    Type: String
+    Default: aq-sky-classifier
+    Description: SageMaker endpoint invoked when ScanFunction MODEL_MODE is set to sagemaker.
+
 Resources:
   GeoCellsTable:
     Type: AWS::DynamoDB::Table
@@ -235,6 +241,11 @@ Resources:
             TableName: !Ref GeoCellsTable
         - DynamoDBCrudPolicy:
             TableName: !Ref StationsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sagemaker:InvokeEndpoint
+              Resource: !Sub arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${SageMakerEndpointName}
       Events:
         ScanApi:
           Type: HttpApi
@@ -250,6 +261,9 @@ Resources:
           GEOCELLS_TABLE: !Ref GeoCellsTable
           STATIONS_TABLE: !Ref StationsTable
           SCANS_BUCKET: !Ref ScansBucket
+          MODEL_MODE: stub
+          SAGEMAKER_ENDPOINT_NAME: !Ref SageMakerEndpointName
+          SAGEMAKER_INVOKE_TIMEOUT_SECONDS: "20"
 
   ScansMineFunction:
     Type: AWS::Serverless::Function
