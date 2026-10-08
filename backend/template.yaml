@@ -274,6 +274,32 @@ Resources:
         Variables:
           SCANS_TABLE: !Ref ScansTable
 
+  MapFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/map/
+      Handler: app.handler
+      Timeout: 15
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref GeoCellsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref StationsTable
+      Events:
+        MapApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /map
+            Method: get
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Environment:
+        Variables:
+          GEOCELLS_TABLE: !Ref GeoCellsTable
+          STATIONS_TABLE: !Ref StationsTable
+
   PreSignupPermission:
     Type: AWS::Lambda::Permission
     Properties:
