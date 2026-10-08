@@ -2,9 +2,11 @@ import asyncio
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import boto3
+
+IST = timezone(timedelta(hours=5, minutes=30), name="IST")
 
 sys_path_inserted = False
 
@@ -86,29 +88,30 @@ def handler(event, context):
     logger.debug("Location validation passed", extra={"lat": lat_f, "lon": lon_f, "accuracy": accuracy_f})
 
     now_utc = datetime.now(timezone.utc)
+    now_ist = now_utc.astimezone(IST)
     now_ts = now_utc.timestamp()
 
     if timestamp_str is not None:
         try:
             if isinstance(timestamp_str, (int, float)) or (isinstance(timestamp_str, str) and timestamp_str.isdigit()):
                 timestamp_f = float(timestamp_str)
-                ts_dt = datetime.fromtimestamp(timestamp_f, tz=timezone.utc)
+                ts_dt = datetime.fromtimestamp(timestamp_f, tz=IST)
             else:
                 ts_str = str(timestamp_str).replace("Z", "+00:00")
                 ts_dt = datetime.fromisoformat(ts_str)
                 if ts_dt.tzinfo is None:
-                    ts_dt = ts_dt.replace(tzinfo=timezone.utc)
+                    ts_dt = ts_dt.replace(tzinfo=IST)
                 timestamp_f = ts_dt.timestamp()
             delta_sec = timestamp_f - now_ts
             if delta_sec < -3600 or delta_sec > 600:
-                logger.warning("Timestamp out of allowed range", extra={"delta_sec": delta_sec})
+                logger.warning("Timestamp out of allowed range", extra={"delta_sec": delta_sec, "timestamp_str": timestamp_str})
                 return error_response("BAD_REQUEST", "timestamp out of allowed range", 400)
-            timestamp_for_scan = ts_dt.isoformat()
+            timestamp_for_scan = ts_dt.astimezone(IST).isoformat()
         except Exception as e:
             logger.warning("Invalid timestamp format", extra={"timestamp_str": timestamp_str, "error": str(e)})
             return error_response("BAD_REQUEST", "Invalid timestamp", 400)
     else:
-        timestamp_for_scan = now_utc.isoformat()
+        timestamp_for_scan = now_ist.isoformat()
         logger.debug("Using current timestamp")
 
     bucket_name = os.environ.get("SCANS_BUCKET", "")

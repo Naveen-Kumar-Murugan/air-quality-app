@@ -1,7 +1,9 @@
 import json
 import os
 import boto3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+
+IST = timezone(timedelta(hours=5, minutes=30), name="IST")
 
 def handler(event, context):
     import sys
@@ -28,7 +30,8 @@ def handler(event, context):
     table = dynamodb.Table(table_name)
 
     now_utc = datetime.now(timezone.utc)
-    hour_str = now_utc.strftime("%Y-%m-%d-%H")
+    now_ist = now_utc.astimezone(IST)
+    hour_str = now_ist.strftime("%Y-%m-%d-%H")
     ttl_val = int(now_utc.timestamp()) + 7200
     logger.debug("Checking rate limit", extra={"hour_str": hour_str})
 
