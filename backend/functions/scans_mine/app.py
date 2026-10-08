@@ -6,7 +6,7 @@ sys_path_inserted = False
 
 def handler(event, context):
     import sys
-    common_path = os.path.join(os.path.dirname(__file__), "..", "..", "layers", "common", "python")
+    common_path = os.path.join(os.path.dirname(__file__), "..", "..", "layers", "common")
     if common_path not in sys.path:
         sys.path.insert(0, common_path)
     opt_path = "/opt/python"
@@ -14,16 +14,22 @@ def handler(event, context):
         sys.path.insert(0, opt_path)
 
     import boto3
-    from common.util import json_response, error_response
+    from common.util import json_response, error_response, get_logger
+
+    logger = get_logger(__name__)
+    logger.info("Scans mine handler invoked")
 
     try:
         user_id = event.get("requestContext", {}).get("authorizer", {}).get("jwt", {}).get("claims", {}).get("sub", "")
-    except Exception:
+    except Exception as e:
+        logger.error("Failed to extract user ID", extra={"error": str(e)})
         return error_response("UNAUTHORIZED", "Missing user identity", 401)
 
     if not user_id:
+        logger.warning("Unauthorized request - missing user identity")
         return error_response("UNAUTHORIZED", "Missing user identity", 401)
 
+    logger.info("Fetching user scans", extra={"user_id": user_id})
     table_name = os.environ.get("SCANS_TABLE", "ScansTable")
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(table_name)
@@ -34,7 +40,9 @@ def handler(event, context):
         try:
             decoded = base64.urlsafe_b64decode(page_token.encode("ascii"))
             exclusive_start_key = json.loads(decoded)
-        except Exception:
+            logger.debug("Decoded page token", extra={"page_token_length": len(page_token)})
+        except Exception as e:
+            logger.warning("Invalid page token", extra={"error": str(e)})
             exclusive_start_key = None
 
     try:
@@ -46,8 +54,11 @@ def handler(event, context):
         }
         if exclusive_start_key:
             query_params["ExclusiveStartKey"] = exclusive_start_key
+        logger.debug("Querying DynamoDB", extra={"has_page_token": exclusive_start_key is not None})
         response = table.query(**query_params)
+        logger.info("DynamoDB query successful", extra={"items_count": len(response.get("Items", []))})
     except Exception as e:
+        logger.error("DynamoDB query failed", extra={"error": str(e)})
         return error_response("QUERY_ERROR", str(e), 500)
 
     items = response.get("Items", [])
@@ -55,6 +66,7 @@ def handler(event, context):
     next_token = None
     if last_evaluated_key:
         next_token = base64.urlsafe_b64encode(json.dumps(last_evaluated_key, default=str).encode("ascii")).decode("ascii")
+        logger.debug("Generated next page token")
 
     scans = []
     for item in items:
@@ -71,4 +83,5 @@ def handler(event, context):
         }
         scans.append(scan_obj)
 
+    logger.info("Scans mine request completed", extra={"user_id": user_id, "scans_returned": len(scans), "has_next_page": next_token is not None})
     return json_response(200, {"scans": scans, "nextPageToken": next_token})

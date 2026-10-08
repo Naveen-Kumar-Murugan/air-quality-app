@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from .aqi import aqi_to_category
+from .util import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -23,18 +26,22 @@ class Predictor(Protocol):
 
 class StubPredictor:
     async def predict(self, image_bytes: bytes, ctx: dict) -> Prediction:
+        logger.info("StubPredictor.predict called", extra={"image_size": len(image_bytes), "ctx_keys": list(ctx.keys())})
         station = ctx.get("station")
         station_aqi = ctx.get("station_aqi")
 
         if isinstance(station, dict) and "aqi" in station:
             base_aqi = float(station["aqi"])
             has_station = True
+            logger.debug("Using station AQI from station dict", extra={"station_aqi": base_aqi})
         elif station_aqi is not None:
             base_aqi = float(station_aqi)
             has_station = True
+            logger.debug("Using station AQI from context", extra={"station_aqi": base_aqi})
         else:
             base_aqi = 75.0
             has_station = False
+            logger.debug("No station data, using default AQI", extra={"default_aqi": base_aqi})
 
         weather = ctx.get("weather") or {}
         humidity = weather.get("humidity")
@@ -42,13 +49,16 @@ class StubPredictor:
 
         if humidity is not None and humidity > 80:
             base_aqi *= 1.10
+            logger.debug("Applied humidity adjustment", extra={"humidity": humidity, "adjustment_factor": 1.10})
 
         if wind_speed is not None and wind_speed > 5:
             base_aqi *= 0.90
+            logger.debug("Applied wind speed adjustment", extra={"wind_speed": wind_speed, "adjustment_factor": 0.90})
 
         final_aqi = max(0, min(500, round(base_aqi)))
         cat = aqi_to_category(final_aqi)
         conf = 0.7 if has_station else 0.4
+        logger.info("Prediction complete", extra={"aqi": final_aqi, "category": cat, "confidence": conf, "has_station": has_station})
 
         return Prediction(
             aqi=final_aqi,
@@ -61,11 +71,15 @@ class StubPredictor:
 
 class SageMakerPredictor:
     async def predict(self, image_bytes: bytes, ctx: dict) -> Prediction:
+        logger.warning("SageMakerPredictor.predict called but not implemented")
         raise NotImplementedError("SageMakerPredictor will be implemented in Phase 3")
 
 
 def get_predictor(mode: str | None = None) -> Predictor:
     target_mode = mode or os.environ.get("MODEL_MODE", "stub")
+    logger.info("Getting predictor", extra={"mode": target_mode})
     if target_mode.lower() == "sagemaker":
+        logger.info("Using SageMakerPredictor")
         return SageMakerPredictor()
+    logger.info("Using StubPredictor")
     return StubPredictor()

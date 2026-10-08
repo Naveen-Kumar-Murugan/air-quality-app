@@ -1,9 +1,9 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Runtime: python3.12
+    Runtime: python3.13
     Timeout: 30
     MemorySize: 256
     Layers:
@@ -108,9 +108,9 @@ Resources:
     Properties:
       CorsConfiguration:
         CorsRules:
-          - AllowedOrigins: ['*']
+          - AllowedOrigins: ["*"]
             AllowedMethods: [PUT]
-            AllowedHeaders: ['*']
+            AllowedHeaders: ["*"]
             MaxAge: 3000
       LifecycleConfiguration:
         Rules:
@@ -149,9 +149,9 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
-        AllowOrigins: ['*']
+        AllowOrigins: ["*"]
         AllowMethods: [GET, POST, PUT, DELETE, OPTIONS]
-        AllowHeaders: ['*']
+        AllowHeaders: ["*"]
       Auth:
         Authorizers:
           CognitoAuthorizer:
@@ -166,9 +166,9 @@ Resources:
     Properties:
       ContentUri: layers/common/
       CompatibleRuntimes:
-        - python3.12
+        - python3.13
     Metadata:
-      BuildMethod: python3.12
+      BuildMethod: python3.13
 
   HelloFunction:
     Type: AWS::Serverless::Function
