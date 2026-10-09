@@ -451,17 +451,41 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Scan'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Coach'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B1B2B).withOpacity(0.92),
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+          border: Border(top: BorderSide(color: const Color(0xFF22C7E8).withOpacity(0.15), width: 1)),
+          boxShadow: [BoxShadow(color: const Color(0xFF0B1B2B).withOpacity(0.6), blurRadius: 20, offset: const Offset(0, -4))],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(Icons.camera_alt_rounded, 'Scan', 0),
+                _buildNavItem(Icons.explore_rounded, 'Map', 1),
+                _buildNavItem(Icons.history_rounded, 'History', 2),
+                _buildNavItem(Icons.auto_awesome_rounded, 'Coach', 3),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isActive = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        AnimatedContainer(duration: const Duration(milliseconds: 200), padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: isActive ? const Color(0xFF22C7E8).withOpacity(0.15) : Colors.transparent, shape: BoxShape.circle),
+          child: Icon(icon, color: isActive ? const Color(0xFF22C7E8) : const Color(0xFFE4EFFF).withOpacity(0.5), size: 24)),
+        Text(label, style: TextStyle(color: isActive ? const Color(0xFF22C7E8) : const Color(0xFFE4EFFF).withOpacity(0.5), fontSize: 10, fontWeight: isActive ? FontWeight.w600 : FontWeight.w400, letterSpacing: 0.3))
+      ]),
+    );
+  }
+
 }
