@@ -465,9 +465,11 @@ class _CoachScreenState extends State<CoachScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
             Container(
               width: 80,
               height: 80,
@@ -506,7 +508,8 @@ class _CoachScreenState extends State<CoachScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
