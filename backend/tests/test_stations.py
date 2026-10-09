@@ -25,16 +25,18 @@ async def test_get_nearest_station_cached_fresh():
     def mock_query(KeyConditionExpression=None, **kwargs):
         return {
             "Items": [
-                {"pk": "G#tdr1", "sk": "META", "fetchedAt": now_iso},
+                {"pk": "S#tdr1", "sk": "META", "fetchedAt": now_iso},
                 {
-                    "pk": "G#tdr1",
-                    "sk": "STATION#st1",
+                    "pk": "S#tdr1",
+                    "sk": "ST#st1",
                     "id": "st1",
                     "name": "Central Station",
                     "lat": 12.9720,
                     "lon": 77.5950,
                     "pm25": 25.0,
                     "aqi": 78,
+                    "aqiUS": 78,
+                    "measuredAt": now_iso,
                     "fetchedAt": now_iso,
                 },
             ]
