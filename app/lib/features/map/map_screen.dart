@@ -585,7 +585,7 @@ class _MapScreenState extends State<MapScreen> {
           // Loading indicator
           if (_isLoading)
             Positioned(
-              top: 60,
+              top: 200,
               right: 16,
               child: Material(
                 elevation: 4,
