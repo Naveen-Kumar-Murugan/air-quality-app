@@ -4,6 +4,7 @@ import 'core/api_client.dart';
 import 'features/scan/scan_screen.dart';
 import 'features/scan/history_screen.dart';
 import 'features/map/map_screen.dart';
+import 'features/coach/coach_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -122,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const ScanScreen(),
     const MapScreen(),
     const HistoryScreen(),
-    const PlaceholderScreen(title: 'Coach', icon: Icons.chat),
+    const CoachScreen(),
   ];
 
   @override
