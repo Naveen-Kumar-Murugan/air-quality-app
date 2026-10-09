@@ -90,15 +90,13 @@ def test_handler_queries_cells_and_stations():
     station_table.query.return_value = {
         "Items": [
             {
-                "pk": "S#tdr1",
+                "pk": "G#tdr1",
                 "sk": "ST#station-1",
                 "id": "station-1",
                 "name": "Station 1",
                 "lat": Decimal("13.0"),
                 "lon": Decimal("77.6"),
                 "aqi": Decimal("112"),
-                "aqiUS": Decimal("112"),
-                "measuredAt": now.isoformat(),
                 "fetchedAt": now.isoformat(),
             }
         ]

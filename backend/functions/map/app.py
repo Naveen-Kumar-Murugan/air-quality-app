@@ -66,14 +66,14 @@ def _station_items(table: Any, partitions: set[str]) -> list[dict]:
     for partition in partitions:
         response = table.query(
             KeyConditionExpression=Key("pk").eq(f"S#{partition}"),
-            ProjectionExpression="pk, sk, id, #name, lat, lon, aqi, aqiUS, measuredAt, fetchedAt",
+            ProjectionExpression="pk, sk, id, #name, lat, lon, aqi, measuredAt, fetchedAt",
             ExpressionAttributeNames={"#name": "name"},
         )
         items.extend(response.get("Items", []))
         while response.get("LastEvaluatedKey"):
             response = table.query(
                 KeyConditionExpression=Key("pk").eq(f"S#{partition}"),
-                ProjectionExpression="pk, sk, id, #name, lat, lon, aqi, aqiUS, measuredAt, fetchedAt",
+                ProjectionExpression="pk, sk, id, #name, lat, lon, aqi, measuredAt, fetchedAt",
                 ExpressionAttributeNames={"#name": "name"},
                 ExclusiveStartKey=response["LastEvaluatedKey"],
             )
