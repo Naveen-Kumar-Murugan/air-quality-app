@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'scan_service.dart';
@@ -56,6 +57,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
   }
 
   void _startSensorUpdates() {
+    double? lastAccuracy;
     _sensorTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       try {
         final position = await Geolocator.getCurrentPosition(
@@ -63,9 +65,12 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
           timeLimit: const Duration(seconds: 1),
         );
         if (mounted) {
-          setState(() {
-            _gpsAccuracy = position.accuracy;
-          });
+          if (lastAccuracy == null || (position.accuracy - lastAccuracy!).abs() > 30.0) {
+            lastAccuracy = position.accuracy;
+            setState(() {
+              _gpsAccuracy = position.accuracy;
+            });
+          }
         }
       } catch (e) {
         // Silently fail for periodic updates
@@ -154,7 +159,107 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
       _updateProgressDialog('Getting upload URL...');
 
       final authService = AuthService();
-      final apiClient = ApiClient(authService);
+      final apiClient = ApiClient(authService, longTimeout: true);
+      final scanService = ScanService(apiClient);
+
+      final uploadResponse = await scanService.getUploadUrl();
+
+      _updateProgressDialog('Uploading image...');
+
+      await scanService.uploadImage(uploadResponse.uploadUrl, compressedBytes);
+
+      _updateProgressDialog('Processing scan...');
+
+      final submission = ScanSubmission(
+        scanId: uploadResponse.scanId,
+        s3Key: uploadResponse.s3Key,
+        lat: position.latitude,
+        lon: position.longitude,
+        accuracy: position.accuracy,
+        pressure: null,
+        tag: _selectedTag,
+        timestamp: DateTime.now(),
+      );
+
+      final result = await scanService.submitScan(submission);
+
+      Navigator.of(context).pop();
+
+      if (mounted) {
+        notifyMapRefresh();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(result: result),
+          ),
+        );
+      }
+    } on RateLimitException catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog(e.message);
+    } catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog('Failed to process scan: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _pickFromGalleryAndUpload() async {
+    if (_isProcessing) return;
+    
+    // Request photos permission
+    final photosStatus = await Permission.photos.request();
+    if (photosStatus.isDenied) {
+      _showErrorDialog('Photos permission is required to select images');
+      return;
+    }
+    if (photosStatus.isPermanentlyDenied) {
+      _showErrorDialog('Photos permission permanently denied. Please enable in settings.');
+      return;
+    }
+    
+    setState(() {
+      _isProcessing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) {
+        setState(() {
+          _isProcessing = false;
+        });
+        return;
+      }
+
+      _showProgressDialog('Getting location...');
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      if (position.accuracy > 50) {
+        _showWarningDialog('GPS accuracy is poor (${position.accuracy.toStringAsFixed(0)}m). Results may be less accurate.');
+      }
+
+      _updateProgressDialog('Processing image...');
+
+      final imageBytes = await pickedFile.readAsBytes();
+
+      _updateProgressDialog('Compressing image...');
+
+      final compressedBytes = await _compressImage(imageBytes);
+
+      _updateProgressDialog('Getting upload URL...');
+
+      final authService = AuthService();
+      final apiClient = ApiClient(authService, longTimeout: true);
       final scanService = ScanService(apiClient);
 
       final uploadResponse = await scanService.getUploadUrl();
@@ -751,86 +856,35 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Gallery thumbnail placeholder
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD4E4FA),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.photo_library,
-                  color: Color(0xFF2A6FDB),
-                  size: 24,
+              GestureDetector(
+                onTap: _isProcessing ? null : _pickFromGalleryAndUpload,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4E4FA),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.photo_library,
+                    color: Color(0xFF2A6FDB),
+                    size: 24,
+                  ),
                 ),
               ),
               
               // Shutter button
               _buildShutterButton(),
-              
-              // Zoom toggle (placeholder)
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0B1B2B).withOpacity(0.75),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        '0.5x',
-                        style: TextStyle(
-                          color: Colors.white60,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF6F9FC),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        '1x',
-                        style: TextStyle(
-                          color: Color(0xFF2A6FDB),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+
+              // Spacer to balance gallery button on left
+              const SizedBox(width: 48),
             ],
           ),
         ],

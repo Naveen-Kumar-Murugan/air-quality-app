@@ -45,5 +45,7 @@
 	<string>Take photos of the sky to estimate air quality</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Location is needed to match your scan with nearby air quality stations</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select photos from your library to analyze air quality</string>
 </dict>
 </plist>
