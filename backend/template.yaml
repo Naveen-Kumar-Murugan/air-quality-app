@@ -3,11 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Runtime: python3.13
     Timeout: 30
     MemorySize: 256
-    Layers:
-      - !Ref CommonLayer
     Environment:
       Variables:
         SCANS_TABLE: !Ref ScansTable
@@ -187,6 +184,9 @@ Resources:
     Properties:
       CodeUri: functions/hello/
       Handler: app.handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Events:
         Get:
           Type: HttpApi
@@ -202,6 +202,9 @@ Resources:
     Properties:
       CodeUri: functions/pre_signup/
       Handler: app.handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Timeout: 3
       MemorySize: 128
 
@@ -210,6 +213,9 @@ Resources:
     Properties:
       CodeUri: functions/upload_url/
       Handler: app.handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Timeout: 10
       MemorySize: 256
       Policies:
@@ -236,6 +242,9 @@ Resources:
     Properties:
       CodeUri: functions/scan/
       Handler: app.handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Timeout: 30
       MemorySize: 512
       Policies:
@@ -276,6 +285,9 @@ Resources:
     Properties:
       CodeUri: functions/scans_mine/
       Handler: app.handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Timeout: 10
       MemorySize: 256
       Policies:
@@ -294,49 +306,14 @@ Resources:
         Variables:
           SCANS_TABLE: !Ref ScansTable
 
-  CoachFunction:
-    Type: AWS::Serverless::Function
-    PackageType: Image
-    Properties:
-      ImageUri: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/coach-function:latest
-      Architectures: [arm64]
-      Timeout: 30
-      MemorySize: 512
-      Policies:
-        - Statement:
-            - Effect: Allow
-              Action:
-                - bedrock:InvokeModel
-              Resource:
-                - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-lite-v1:0
-        - DynamoDBReadPolicy:
-            TableName: !Ref ScansTable
-        - DynamoDBReadPolicy:
-            TableName: !Ref GeoCellsTable
-        - DynamoDBReadPolicy:
-            TableName: !Ref StationsTable
-      Events:
-        CoachApi:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref HttpApi
-            Path: /coach
-            Method: post
-            Auth:
-              Authorizer: CognitoAuthorizer
-      Environment:
-        Variables:
-          BEDROCK_MODEL_ID: amazon.nova-lite-v1:0
-          BEDROCK_REGION: ap-south-1
-          GEOCELLS_TABLE: !Ref GeoCellsTable
-          STATIONS_TABLE: !Ref StationsTable
-          SCANS_TABLE: !Ref ScansTable
-
   MapFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/map/
       Handler: app.handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Timeout: 15
       MemorySize: 512
       Policies:
@@ -363,6 +340,9 @@ Resources:
     Properties:
       CodeUri: functions/route/
       Handler: app.lambda_handler
+      Runtime: python3.13
+      Layers:
+        - !Ref CommonLayer
       Timeout: 30
       MemorySize: 512
       Policies:
@@ -387,18 +367,15 @@ Resources:
 
   CoachFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./functions/coach
     Properties:
       PackageType: Image
       Architectures:
         - arm64
-      Metadata:
-        Dockerfile: Dockerfile
-        DockerContext: ./functions/coach
-      CodeUri: functions/coach/
-      Handler: app.lambda_handler
-      Timeout: 30
+      Timeout: 60
       MemorySize: 512
-      Layers: []
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -409,7 +386,6 @@ Resources:
               Resource:
                 - arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-lite-v1:0
                 - arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0
-                - "*"
             - Sid: DynamoDBRead
               Effect: Allow
               Action:
