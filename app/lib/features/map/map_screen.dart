@@ -478,7 +478,7 @@ class _MapScreenState extends State<MapScreen> {
 
           // Filter pill tabs (floating over map, screen 04 style)
           Positioned(
-            top: 132,
+            top: 35,
             left: 16,
             right: 16,
             child: Row(
@@ -499,31 +499,13 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 const SizedBox(width: 8),
                 // Search trigger
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.92),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(Icons.search, color: _darkNavy, size: 20),
-                  ),
-                ),
               ],
             ),
           ),
 
           // Legend pill (top-left inside map, screen 04 style)
           Positioned(
-            top: 200,
+            bottom:10,
             left: 16,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -554,15 +536,12 @@ class _MapScreenState extends State<MapScreen> {
 
           // Right floating actions (locate, layer, 3D)
           Positioned(
-            top: 200,
+            bottom: 10,
             right: 16,
             child: Column(
               children: [
                 _actionButton(Icons.my_location, onTap: _goToMyLocation),
                 const SizedBox(height: 8),
-                _actionButton(Icons.tune, onTap: () {}),
-                const SizedBox(height: 8),
-                _actionButtonText('3D', onTap: () {}),
               ],
             ),
           ),
@@ -629,254 +608,7 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
 
-          // Bottom station / cell detail sheet (screen 04 style)
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF8F9FF),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 20,
-                    offset: Offset(0, -4),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 36),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Drag affordance
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Header with title and AQI badge
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.park,
-                                  size: 16,
-                                  color: Colors.grey.shade600,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Central Urban Oasis • Sector 03',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade600,
-                                    letterSpacing: 0.01,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Cubbon Park Sanctuary',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.02,
-                                color: Color(0xFF0B1B2B),
-                                height: 1.15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00E400),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00E400).withValues(alpha: 0.35),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'Good • AQI 42',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                letterSpacing: -0.01,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Metadata row (scans / freshness)
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        _metaItem(
-                          icon: Icons.camera_alt,
-                          label: 'Community Scans',
-                          value: '14 scans today',
-                        ),
-                        const SizedBox(width: 12),
-                        _metaItem(
-                          icon: Icons.update,
-                          label: 'Telemetry Freshness',
-                          value: 'Updated 12m ago',
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  // Cleaner route banner
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE4EFFD),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: const BoxDecoration(
-                            color: _blue,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.eco,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Cleaner Route Alert',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: _blue,
-                                  letterSpacing: -0.01,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                'Walking through Cubbon Park reduces PM2.5 particle exposure by 41% compared to MG Road artery.',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  height: 1.35,
-                                  color: Color(0xFF0B1B2B),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  // CTA buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.navigation, size: 18),
-                          label: const Text(
-                            'Find cleaner route',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            elevation: 2,
-                            shadowColor: _blue.withValues(alpha: 0.3),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade200),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.share,
-                            color: _darkNavy,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+
         ],
       ),
     );

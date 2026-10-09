@@ -94,6 +94,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        const SizedBox(height: 24),
         _buildHeader(),
         const SizedBox(height: 24),
         _buildStatsCards(),
@@ -106,8 +107,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: EdgeInsets.all(16.0),
             child: Center(child: CircularProgressIndicator()),
           ),
-        const SizedBox(height: 16),
-        _buildMeshCalibrationCard(),
       ],
     );
   }
@@ -528,115 +527,115 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildMeshCalibrationCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEEF4FF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE3EAF2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD8E2FF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.hub_outlined,
-                      size: 18,
-                      color: const Color(0xFF0056BB),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Open Mesh Calibration',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF0D1D2D),
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                'Active',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF0056BB),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Contributing to the open mesh: Every scan anonymously refines microclimate estimates for your neighborhood.',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 14,
-              color: const Color(0xFF6B7280),
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00687A),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Decentralized verification',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 13,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                'Learn more →',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF0056BB),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildMeshCalibrationCard() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: const Color(0xFFEEF4FF),
+  //       borderRadius: BorderRadius.circular(16),
+  //       border: Border.all(color: const Color(0xFFE3EAF2)),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.04),
+  //           blurRadius: 4,
+  //           offset: const Offset(0, 1),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Row(
+  //               children: [
+  //                 Container(
+  //                   width: 28,
+  //                   height: 28,
+  //                   decoration: BoxDecoration(
+  //                     color: const Color(0xFFD8E2FF),
+  //                     shape: BoxShape.circle,
+  //                   ),
+  //                   child: Icon(
+  //                     Icons.hub_outlined,
+  //                     size: 18,
+  //                     color: const Color(0xFF0056BB),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 8),
+  //                 Text(
+  //                   'Open Mesh Calibration',
+  //                   style: TextStyle(
+  //                     fontFamily: 'Inter',
+  //                     fontSize: 16,
+  //                     fontWeight: FontWeight.w600,
+  //                     color: const Color(0xFF0D1D2D),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             Text(
+  //               'Active',
+  //               style: TextStyle(
+  //                 fontFamily: 'Inter',
+  //                 fontSize: 12,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: const Color(0xFF0056BB),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 12),
+  //         Text(
+  //           'Contributing to the open mesh: Every scan anonymously refines microclimate estimates for your neighborhood.',
+  //           style: TextStyle(
+  //             fontFamily: 'Inter',
+  //             fontSize: 14,
+  //             color: const Color(0xFF6B7280),
+  //             height: 1.5,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 12),
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Row(
+  //               children: [
+  //                 Container(
+  //                   width: 8,
+  //                   height: 8,
+  //                   decoration: BoxDecoration(
+  //                     color: const Color(0xFF00687A),
+  //                     shape: BoxShape.circle,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 6),
+  //                 Text(
+  //                   'Decentralized verification',
+  //                   style: TextStyle(
+  //                     fontFamily: 'Inter',
+  //                     fontSize: 13,
+  //                     color: const Color(0xFF6B7280),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             Text(
+  //               'Learn more →',
+  //               style: TextStyle(
+  //                 fontFamily: 'Inter',
+  //                 fontSize: 12,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: const Color(0xFF0056BB),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildEmptyState() {
     return ListView(
