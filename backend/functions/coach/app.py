@@ -45,7 +45,7 @@ def get_template_response(message: str, context: dict) -> dict:
 
 # --- Strands Agent Setup ---
 
-MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
+MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "apac.amazon.nova-lite-v1:0")
 REGION = os.environ.get("BEDROCK_REGION", "ap-south-1")
 
 model = BedrockModel(model_id=MODEL_ID, region_name=REGION)
