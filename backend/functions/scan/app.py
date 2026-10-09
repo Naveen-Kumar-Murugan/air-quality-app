@@ -198,6 +198,8 @@ def handler(event, context):
     scans_table_name = os.environ.get("SCANS_TABLE", "ScansTable")
     scans_table = dynamodb.Table(scans_table_name)
 
+    gh6 = geohash.encode(lat_f, lon_f, 6)
+    
     scan_item = {
         "pk": f"U#{user_id}",
         "sk": f"S#{scan_id}",
@@ -214,6 +216,8 @@ def handler(event, context):
         "scanWeight": float_to_decimal(scan_weight_val),
         "s3Key": s3_key,
         "inMap": in_map_val,
+        "gsi1pk": f"H#{gh6}",
+        "gsi1sk": timestamp_for_scan,
     }
     if tag is not None:
         scan_item["tag"] = tag

@@ -58,7 +58,7 @@ async def get_nearest_station(
     partition_items = {}
 
     for gh4 in partitions:
-        pk_val = f"G#{gh4}"
+        pk_val = f"S#{gh4}"
         try:
             res = table.query(KeyConditionExpression=Key("pk").eq(pk_val))
             items = res.get("Items", [])
@@ -91,7 +91,7 @@ async def get_nearest_station(
 
         new_items = []
         meta_record = {
-            "pk": f"G#{gh4}",
+            "pk": f"S#{gh4}",
             "sk": "META",
             "fetchedAt": now_iso,
             "ttl": ttl_val,
@@ -120,15 +120,18 @@ async def get_nearest_station(
                 continue
 
             aqi_val = pm25_to_aqi(pm25_val)
+            measured_at = st.get("lastUpdated", now_iso)
             st_item = {
-                "pk": f"G#{gh4}",
-                "sk": f"STATION#{st_id}",
+                "pk": f"S#{gh4}",
+                "sk": f"ST#{st_id}",
                 "id": st_id,
                 "name": st_name,
                 "lat": float(st_lat),
                 "lon": float(st_lon),
                 "pm25": float(pm25_val),
                 "aqi": int(aqi_val),
+                "aqiUS": int(aqi_val),
+                "measuredAt": measured_at,
                 "fetchedAt": now_iso,
                 "ttl": ttl_val,
             }
