@@ -261,7 +261,7 @@ Resources:
           GEOCELLS_TABLE: !Ref GeoCellsTable
           STATIONS_TABLE: !Ref StationsTable
           SCANS_BUCKET: !Ref ScansBucket
-          MODEL_MODE: stub
+          MODEL_MODE: sagemaker
           SAGEMAKER_ENDPOINT_NAME: !Ref SageMakerEndpointName
           SAGEMAKER_INVOKE_TIMEOUT_SECONDS: "20"
 
