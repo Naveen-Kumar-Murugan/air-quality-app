@@ -261,7 +261,7 @@ Resources:
           GEOCELLS_TABLE: !Ref GeoCellsTable
           STATIONS_TABLE: !Ref StationsTable
           SCANS_BUCKET: !Ref ScansBucket
-          MODEL_MODE: stub
+          MODEL_MODE: sagemaker
           SAGEMAKER_ENDPOINT_NAME: !Ref SageMakerEndpointName
           SAGEMAKER_INVOKE_TIMEOUT_SECONDS: "20"
 
@@ -335,3 +335,9 @@ Outputs:
   Region:
     Description: AWS Region
     Value: !Ref AWS::Region
+  ModelsBucketName:
+    Description: S3 bucket for ML model artifacts
+    Value: !Ref ModelsBucket
+  SageMakerEndpointName:
+    Description: SageMaker endpoint name for AQI sky classifier
+    Value: !Ref SageMakerEndpointName
