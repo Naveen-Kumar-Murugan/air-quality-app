@@ -8,7 +8,7 @@ import '../routing/route_service.dart';
 class CoachScreen extends StatefulWidget {
   final RouteOption? routeContext;
 
-  const CoachScreen({Key? key, this.routeContext}) : super(key: key);
+  const CoachScreen({super.key, this.routeContext});
 
   @override
   State<CoachScreen> createState() => _CoachScreenState();
@@ -25,11 +25,19 @@ class _CoachScreenState extends State<CoachScreen> {
   bool _isTyping = false;
   String? _errorMessage;
 
-  final List<String> _suggestedPrompts = [
-    "Is it safe to jog now?",
-    "Why is this route cleaner?",
-    "What's the air quality like today?",
-    "Should I exercise outdoors?",
+  final List<SuggestedPrompt> _suggestedPrompts = [
+    SuggestedPrompt(
+      icon: Icons.directions_run,
+      text: "Is it safe to jog now?",
+    ),
+    SuggestedPrompt(
+      icon: Icons.alt_route,
+      text: "Why is this route cleaner?",
+    ),
+    SuggestedPrompt(
+      icon: Icons.drive_file_rename_outline,
+      text: "What do optical estimates mean?",
+    ),
   ];
 
   @override
@@ -172,57 +180,285 @@ class _CoachScreenState extends State<CoachScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Air Quality Coach'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _getCurrentLocation,
-            tooltip: 'Refresh location',
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFFF6F9FF),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          if (_isLoading)
-            const LinearProgressIndicator()
-          else if (_errorMessage != null)
-            Container(
-              color: Colors.orange.shade100,
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Icon(Icons.warning, color: Colors.orange),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _buildHeroCard(),
+          if (_currentPosition != null) _buildLocationStrip(),
           Expanded(
             child: _messages.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _messages.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    itemCount: _messages.length + (_isTyping ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (index == _messages.length && _isTyping) {
+                        return _buildTypingIndicator();
+                      }
                       return _buildMessageBubble(_messages[index]);
                     },
                   ),
           ),
-          if (_isTyping) _buildTypingIndicator(),
           if (_messages.isEmpty && _currentPosition != null)
             _buildSuggestedPrompts(),
           _buildInputArea(),
         ],
       ),
     );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: const Color(0xFFF6F9FF),
+      elevation: 0,
+      centerTitle: false,
+      title: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A6FDB),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: const Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Skylens',
+                style: TextStyle(
+                  fontFamily: 'Space Grotesk',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0D1D2D),
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Coach',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey[600],
+                  height: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        if (_isLoading)
+          const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF0D1D2D)),
+            onPressed: _getCurrentLocation,
+            tooltip: 'Refresh location',
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHeroCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFADECFF),
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: const Icon(
+                  Icons.air,
+                  color: Color(0xFF005F70),
+                  size: 24,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00A854),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Strands Air Coach',
+                  style: TextStyle(
+                    fontFamily: 'Space Grotesk',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0D1D2D),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Powered by Bedrock Claude & EPA micro-data',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDAE9FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A854),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  'Online',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF005F70),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationStrip() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF4FF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.my_location,
+                size: 18,
+                color: Color(0xFF0056BB),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Current Location Context',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          if (widget.routeContext != null)
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _getAqiColor(widget.routeContext!.avgAqi),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'AQI ~${widget.routeContext!.avgAqi.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFB95600),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _getAqiColor(double aqi) {
+    if (aqi <= 50) return const Color(0xFF00A854);
+    if (aqi <= 100) return const Color(0xFFFFC107);
+    if (aqi <= 150) return const Color(0xFFFF9800);
+    return const Color(0xFFBA1A1A);
   }
 
   Widget _buildEmptyState() {
@@ -232,25 +468,40 @@ class _CoachScreenState extends State<CoachScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.chat_bubble_outline,
-              size: 80,
-              color: Colors.grey.shade400,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFFADECFF),
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: const Icon(
+                Icons.auto_awesome,
+                size: 40,
+                color: Color(0xFF005F70),
+              ),
             ),
             const SizedBox(height: 24),
-            Text(
+            const Text(
               'Ask the Air Quality Coach',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.grey.shade700,
-                  ),
+              style: TextStyle(
+                fontFamily: 'Space Grotesk',
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0D1D2D),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
-              'Get personalized advice about air quality and outdoor activities',
+              'Get personalized advice about air quality and outdoor activities based on real-time data',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                color: Colors.grey[600],
+                height: 1.5,
+              ),
             ),
           ],
         ),
@@ -260,86 +511,174 @@ class _CoachScreenState extends State<CoachScreen> {
 
   Widget _buildMessageBubble(ChatMessage message) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment:
-            message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!message.isUser) ...[
-            CircleAvatar(
-              backgroundColor: message.isSystem
-                  ? Colors.grey.shade300
-                  : Colors.blue.shade100,
-              child: Icon(
-                message.isSystem ? Icons.info_outline : Icons.support_agent,
-                color: message.isSystem ? Colors.grey.shade700 : Colors.blue,
-                size: 20,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: message.isUser
+          ? _buildUserMessageBubble(message)
+          : _buildAiMessageBubble(message),
+    );
+  }
+
+  Widget _buildUserMessageBubble(ChatMessage message) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.85,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A6FDB),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
-            ),
-            const SizedBox(width: 8),
-          ],
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: message.isUser
-                    ? Colors.blue
-                    : message.isSystem
-                        ? Colors.grey.shade200
-                        : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.text,
-                    style: TextStyle(
-                      color: message.isUser ? Colors.white : Colors.black87,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatTime(message.timestamp),
-                    style: TextStyle(
-                      color: message.isUser
-                          ? Colors.white70
-                          : Colors.grey.shade600,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
+            ],
+          ),
+          child: Text(
+            message.text,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+              height: 1.5,
             ),
           ),
-          if (message.isUser) ...[
-            const SizedBox(width: 8),
-            CircleAvatar(
-              backgroundColor: Colors.blue.shade700,
-              child: const Icon(Icons.person, color: Colors.white, size: 20),
-            ),
-          ],
-        ],
-      ),
+        ),
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _formatTime(message.timestamp),
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.done_all,
+                size: 14,
+                color: Color(0xFF0056BB),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAiMessageBubble(ChatMessage message) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          margin: const EdgeInsets.only(top: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFADECFF),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.auto_awesome,
+            size: 18,
+            color: Color(0xFF005F70),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.92,
+                ),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  message.text,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF0D1D2D),
+                    height: 1.6,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  _formatTime(message.timestamp),
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildTypingIndicator() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundColor: Colors.blue.shade100,
-            child: const Icon(Icons.support_agent, color: Colors.blue, size: 20),
+          Container(
+            width: 32,
+            height: 32,
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFADECFF),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: 18,
+              color: Color(0xFF005F70),
+            ),
           ),
           const SizedBox(width: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -370,7 +709,7 @@ class _CoachScreenState extends State<CoachScreen> {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.grey.shade600,
+              color: Colors.grey[600],
               shape: BoxShape.circle,
             ),
           ),
@@ -386,33 +725,78 @@ class _CoachScreenState extends State<CoachScreen> {
 
   Widget _buildSuggestedPrompts() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Suggested questions:',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _suggestedPrompts.map((prompt) {
-              return ActionChip(
-                label: Text(prompt),
-                onPressed: () => _sendMessage(prompt),
-                backgroundColor: Colors.blue.shade50,
-                labelStyle: TextStyle(
-                  color: Colors.blue.shade700,
-                  fontSize: 13,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Suggested queries',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[600],
                 ),
-              );
-            }).toList(),
+              ),
+              Icon(
+                Icons.touch_app,
+                size: 16,
+                color: Colors.grey[600],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _suggestedPrompts.map((prompt) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    onTap: () => _sendMessage(prompt.text),
+                    borderRadius: BorderRadius.circular(18),
+                    child: Container(
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            prompt.icon,
+                            size: 16,
+                            color: const Color(0xFF0056BB),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            prompt.text,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF0D1D2D),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -423,48 +807,105 @@ class _CoachScreenState extends State<CoachScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            offset: const Offset(0, -1),
-            blurRadius: 4,
-          ),
-        ],
+        color: const Color(0xFFF6F9FF),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Ask about air quality...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+              ],
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.add_photo_alternate,
+                    color: Colors.grey[600],
+                    size: 22,
+                  ),
+                  onPressed: () {},
+                  tooltip: 'Attach sky snapshot',
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-              ),
-              textInputAction: TextInputAction.send,
-              onSubmitted: _sendMessage,
-              enabled: _currentPosition != null && !_isTyping,
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Ask Air Coach anything...',
+                      hintStyle: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[600],
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
+                    ),
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF0D1D2D),
+                    ),
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: _sendMessage,
+                    enabled: _currentPosition != null && !_isTyping,
+                  ),
+                ),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: _currentPosition != null && !_isTyping
+                        ? const Color(0xFF2A6FDB)
+                        : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_upward,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: _currentPosition != null && !_isTyping
+                        ? () => _sendMessage(_messageController.text)
+                        : null,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          FloatingActionButton(
-            onPressed: _currentPosition != null && !_isTyping
-                ? () => _sendMessage(_messageController.text)
-                : null,
-            mini: true,
-            backgroundColor: _currentPosition != null && !_isTyping
-                ? Colors.blue
-                : Colors.grey.shade300,
-            child: const Icon(Icons.send, size: 20),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.shield,
+                size: 13,
+                color: Colors.grey[600],
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Real-time localized analysis via Skylens Neural Vision',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -489,5 +930,15 @@ class ChatMessage {
     required this.isUser,
     this.isSystem = false,
     required this.timestamp,
+  });
+}
+
+class SuggestedPrompt {
+  final IconData icon;
+  final String text;
+
+  SuggestedPrompt({
+    required this.icon,
+    required this.text,
   });
 }
