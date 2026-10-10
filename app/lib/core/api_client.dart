@@ -6,11 +6,11 @@ class ApiClient {
   late final Dio _dio;
   final AuthService _authService;
 
-  ApiClient(this._authService) {
+  ApiClient(this._authService, {bool longTimeout = false}) {
     _dio = Dio(BaseOptions(
       baseUrl: Config.apiBase,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: longTimeout ? const Duration(seconds: 30) : const Duration(seconds: 10),
+      receiveTimeout: longTimeout ? const Duration(seconds: 60) : const Duration(seconds: 10),
     ));
 
     _dio.interceptors.add(InterceptorsWrapper(

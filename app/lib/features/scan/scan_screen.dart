@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'scan_service.dart';
@@ -18,30 +19,63 @@ class ScanScreen extends StatefulWidget {
   State<ScanScreen> createState() => _ScanScreenState();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateMixin {
   CameraController? _cameraController;
   bool _isInitialized = false;
   bool _isProcessing = false;
   String? _errorMessage;
   String? _selectedTag;
+  double? _gpsAccuracy;
+  Timer? _sensorTimer;
+  late AnimationController _pulseController;
 
-  final List<String> _tags = [
-    'roadside',
-    'park',
-    'indoors-window',
-    'near construction',
+  final List<Map<String, dynamic>> _tags = [
+    {'label': 'Roadside', 'icon': Icons.traffic},
+    {'label': 'Park', 'icon': Icons.park},
+    {'label': 'Near construction', 'icon': Icons.construction},
+    {'label': 'Residential', 'icon': Icons.home},
+    {'label': 'Industrial', 'icon': Icons.factory},
   ];
 
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat();
     _initializeCamera();
+    _startSensorUpdates();
   }
 
   @override
   void dispose() {
     _cameraController?.dispose();
+    _sensorTimer?.cancel();
+    _pulseController.dispose();
     super.dispose();
+  }
+
+  void _startSensorUpdates() {
+    double? lastAccuracy;
+    _sensorTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      try {
+        final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 1),
+        );
+        if (mounted) {
+          if (lastAccuracy == null || (position.accuracy - lastAccuracy!).abs() > 30.0) {
+            lastAccuracy = position.accuracy;
+            setState(() {
+              _gpsAccuracy = position.accuracy;
+            });
+          }
+        }
+      } catch (e) {
+        // Silently fail for periodic updates
+      }
+    });
   }
 
   Future<void> _initializeCamera() async {
@@ -125,7 +159,107 @@ class _ScanScreenState extends State<ScanScreen> {
       _updateProgressDialog('Getting upload URL...');
 
       final authService = AuthService();
-      final apiClient = ApiClient(authService);
+      final apiClient = ApiClient(authService, longTimeout: true);
+      final scanService = ScanService(apiClient);
+
+      final uploadResponse = await scanService.getUploadUrl();
+
+      _updateProgressDialog('Uploading image...');
+
+      await scanService.uploadImage(uploadResponse.uploadUrl, compressedBytes);
+
+      _updateProgressDialog('Processing scan...');
+
+      final submission = ScanSubmission(
+        scanId: uploadResponse.scanId,
+        s3Key: uploadResponse.s3Key,
+        lat: position.latitude,
+        lon: position.longitude,
+        accuracy: position.accuracy,
+        pressure: null,
+        tag: _selectedTag,
+        timestamp: DateTime.now(),
+      );
+
+      final result = await scanService.submitScan(submission);
+
+      Navigator.of(context).pop();
+
+      if (mounted) {
+        notifyMapRefresh();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(result: result),
+          ),
+        );
+      }
+    } on RateLimitException catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog(e.message);
+    } catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog('Failed to process scan: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _pickFromGalleryAndUpload() async {
+    if (_isProcessing) return;
+    
+    // Request photos permission
+    final photosStatus = await Permission.photos.request();
+    if (photosStatus.isDenied) {
+      _showErrorDialog('Photos permission is required to select images');
+      return;
+    }
+    if (photosStatus.isPermanentlyDenied) {
+      _showErrorDialog('Photos permission permanently denied. Please enable in settings.');
+      return;
+    }
+    
+    setState(() {
+      _isProcessing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) {
+        setState(() {
+          _isProcessing = false;
+        });
+        return;
+      }
+
+      _showProgressDialog('Getting location...');
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      if (position.accuracy > 50) {
+        _showWarningDialog('GPS accuracy is poor (${position.accuracy.toStringAsFixed(0)}m). Results may be less accurate.');
+      }
+
+      _updateProgressDialog('Processing image...');
+
+      final imageBytes = await pickedFile.readAsBytes();
+
+      _updateProgressDialog('Compressing image...');
+
+      final compressedBytes = await _compressImage(imageBytes);
+
+      _updateProgressDialog('Getting upload URL...');
+
+      final authService = AuthService();
+      final apiClient = ApiClient(authService, longTimeout: true);
       final scanService = ScanService(apiClient);
 
       final uploadResponse = await scanService.getUploadUrl();
@@ -288,115 +422,596 @@ class _ScanScreenState extends State<ScanScreen> {
 
     return Stack(
       children: [
+        // Camera preview
         Positioned.fill(
           child: CameraPreview(_cameraController!),
         ),
-        Positioned(
-          top: 40,
-          left: 0,
-          right: 0,
+        
+        // Atmospheric gradient overlay
+        Positioned.fill(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'Include the sky or distant buildings',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFF0B1B2B).withOpacity(0.6),
+                  Colors.transparent,
+                  const Color(0xFF0B1B2B).withOpacity(0.85),
+                ],
+                stops: const [0.0, 0.3, 1.0],
               ),
             ),
           ),
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            padding: const EdgeInsets.all(24),
+
+        // Main content
+        SafeArea(
+          child: Column(
+            children: [
+              // Top telemetry pills
+              _buildTopTelemetry(),
+              
+              // Center reticle
+              Expanded(
+                child: Center(
+                  child: _buildReticle(),
+                ),
+              ),
+              
+              // Bottom controls
+              _buildBottomControls(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopTelemetry() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // GPS pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              color: const Color(0xFF0B1B2B).withOpacity(0.75),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: Column(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Optional tags:',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+                FadeTransition(
+                  opacity: _pulseController,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF22C7E8),
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: _tags.map((tag) {
-                    final isSelected = _selectedTag == tag;
-                    return FilterChip(
-                      label: Text(tag),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedTag = selected ? tag : null;
-                        });
-                      },
-                      backgroundColor: Colors.grey.shade800,
-                      selectedColor: Colors.blue,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white70,
-                      ),
-                    );
-                  }).toList(),
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.my_location,
+                  size: 14,
+                  color: Color(0xFF22C7E8),
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _isProcessing ? null : _captureAndUpload,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                    ),
-                    child: _isProcessing
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.camera_alt, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                'Capture & Analyze',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                const SizedBox(width: 6),
+                Text(
+                  'GPS: ±${_gpsAccuracy?.toStringAsFixed(0) ?? '—'}m',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ],
             ),
           ),
+          
+          // Exposure and pressure pills
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B1B2B).withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.wb_sunny,
+                      size: 14,
+                      color: Color(0xFF22C7E8),
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'EV +0.2',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B1B2B).withOpacity(0.75),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.speed,
+                      size: 15,
+                      color: Color(0xFF22C7E8),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      '1014 hPa',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.trending_flat,
+                      size: 12,
+                      color: Color(0xFF22C7E8),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReticle() {
+    return SizedBox(
+      width: 256,
+      height: 256,
+      child: Stack(
+        children: [
+          // Corner brackets
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                  left: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                  right: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                  left: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                  right: BorderSide(color: Color(0xFF22C7E8), width: 2),
+                ),
+              ),
+            ),
+          ),
+          
+          // Horizon line with crosshair
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 1.5,
+                  color: const Color(0xFF22C7E8).withOpacity(0.6),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF22C7E8).withOpacity(0.8),
+                      width: 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 4,
+                      height: 4,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF22C7E8),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 80,
+                  height: 1.5,
+                  color: const Color(0xFF22C7E8).withOpacity(0.6),
+                ),
+              ],
+            ),
+          ),
+          
+          // Vertical reference lines
+          Positioned(
+            top: 12,
+            left: 128,
+            child: Container(
+              width: 1.5,
+              height: 40,
+              color: const Color(0xFF22C7E8).withOpacity(0.4),
+            ),
+          ),
+          Positioned(
+            bottom: 12,
+            left: 128,
+            child: Container(
+              width: 1.5,
+              height: 40,
+              color: const Color(0xFF22C7E8).withOpacity(0.4),
+            ),
+          ),
+          
+          // Optical guidance badge
+          Positioned(
+            top: 24,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B1B2B).withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.photo_size_select_small,
+                      size: 14,
+                      color: Color(0xFF22C7E8),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Include sky & distant horizon',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Solar azimuth badge
+          Positioned(
+            bottom: -32,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B1B2B).withOpacity(0.75),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.light_mode,
+                      size: 13,
+                      color: Color(0xFFFFB68C),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'AZ: 142° • ELEV: 38°',
+                      style: TextStyle(
+                        color: Color(0xFFE4EFFF),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomControls() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Context tags row
+          SizedBox(
+            height: 38,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _tags.length,
+              itemBuilder: (context, index) {
+                final tag = _tags[index];
+                final isSelected = _selectedTag == tag['label'];
+                return Padding(
+                  padding: EdgeInsets.only(right: index < _tags.length - 1 ? 8 : 0),
+                  child: _buildContextTag(
+                    tag['label'] as String,
+                    tag['icon'] as IconData,
+                    isSelected,
+                  ),
+                );
+              },
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Shutter button row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Gallery thumbnail placeholder
+              GestureDetector(
+                onTap: _isProcessing ? null : _pickFromGalleryAndUpload,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4E4FA),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.photo_library,
+                    color: Color(0xFF2A6FDB),
+                    size: 24,
+                  ),
+                ),
+              ),
+              
+              // Shutter button
+              _buildShutterButton(),
+
+              // Spacer to balance gallery button on left
+              const SizedBox(width: 48),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContextTag(String label, IconData icon, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTag = isSelected ? null : label;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? const Color(0xFFF6F9FC) 
+              : const Color(0xFFF6F9FC).withOpacity(0.8),
+          borderRadius: BorderRadius.circular(19),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isSelected ? 0.25 : 0.15),
+              blurRadius: isSelected ? 12 : 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-      ],
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? const Color(0xFF2A6FDB) : const Color(0xFF424753),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF2A6FDB) : const Color(0xFF0D1D2D),
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.check,
+                size: 14,
+                color: Color(0xFF2A6FDB),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShutterButton() {
+    return GestureDetector(
+      onTap: _isProcessing ? null : _captureAndUpload,
+      child: Container(
+        width: 88,
+        height: 88,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2A6FDB).withOpacity(0.2),
+              blurRadius: 24,
+              spreadRadius: 4,
+            ),
+          ],
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF6F9FC).withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF2A6FDB),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Container(
+              margin: const EdgeInsets.all(9),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF6F9FC),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: _isProcessing
+                  ? const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF2A6FDB),
+                        ),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.camera_alt,
+                      color: Color(0xFF2A6FDB),
+                      size: 28,
+                    ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

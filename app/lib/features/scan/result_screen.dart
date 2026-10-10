@@ -33,7 +33,35 @@ class ResultScreen extends StatelessWidget {
                 large: true,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 48),
+            // Large AQI metric-stat (Space Grotesk style)
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    '${result.aqi}',
+                    style: const TextStyle(
+                      fontFamily: 'Space Grotesk',
+                      fontSize: 68,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.02,
+                      height: 1.0,
+                      color: Color(0xFF0B1B2B),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    result.category,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF424753),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Card(
               elevation: 2,
               child: Padding(

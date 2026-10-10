@@ -13,6 +13,9 @@ class CellBottomSheet extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(24),
+      decoration:BoxDecoration(
+        color:Colors.white
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,6 +127,7 @@ class CellBottomSheet extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 40),
         ],
       ),
     );
