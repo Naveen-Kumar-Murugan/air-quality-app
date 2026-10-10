@@ -1,0 +1,927 @@
+<html lang="en">
+								<script>(
+									function e(t){let n={code:2,message:`Position unavailable`},r=navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),i=navigator.geolocation.watchPosition.bind(navigator.geolocation),a=navigator.geolocation.clearWatch.bind(navigator.geolocation),o=navigator.permissions.query.bind(navigator.permissions),s=[`tv.youtube.com`].includes(window.location.hostname),c,l,u,d=!1,f=!1,p=new Map,m=1,h=null,g=new Set;function _(){return{coords:{latitude:l,longitude:u,accuracy:10,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:new Date().getTime()}}function v(){return h?h.lat!==l||h.lon!==u:!0}function y(){if(!c)return;let e=_();p.forEach(({successCallback:t})=>{if(t)try{w(t,e)}catch{}})}function b(){p.forEach(e=>{c?e.realWatchId!==void 0&&(a(e.realWatchId),delete e.realWatchId):e.realWatchId===void 0&&e.successCallback&&(e.realWatchId=i(e.successCallback,e.errorCallback,e.options))})}function x(){localStorage.getItem(`geolocationPermissionState`)!==`granted`&&f?r(()=>{f=!1,T.tmp_successCallback(_()),s&&(localStorage.setItem(`geolocationPermissionState`,`granted`),setTimeout(()=>window.location.reload(),1e3))},T.tmp_errorCallback,T.tmp_options):T.tmp_successCallback(_())}function S(e=0){d?c===!0?x():r(T.tmp_successCallback,T.tmp_errorCallback,T.tmp_options):e<50?setTimeout(()=>S(e+1),100):T.tmp_errorCallback?.(n)}function C(e,t=0){if(e===void 0&&(e=m++),d){if(g.has(e))return g.delete(e),e;if(c===!0)p.set(e,{successCallback:T.tmp2_successCallback,errorCallback:T.tmp2_errorCallback,options:T.tmp2_options}),T.tmp2_successCallback(_());else{let t=i(T.tmp2_successCallback,T.tmp2_errorCallback,T.tmp2_options);p.set(e,{successCallback:T.tmp2_successCallback,errorCallback:T.tmp2_errorCallback,options:T.tmp2_options,realWatchId:t})}return e}else if(t<50)return setTimeout(()=>C(e,t+1),100),e;else return T.tmp2_errorCallback?.(n),e}function w(e,t){let n=e.toString();try{Function(`position`,`return (${n})(position);`)(t)}catch{e(t)}}navigator.permissions.query=async function(e){let t=await o(e);if(e.name!==`geolocation`||!s)return t;let n=t.state;return n===`prompt`&&(n=localStorage.getItem(`geolocationPermissionState`)??n),f=c&&n===`prompt`,{...t,state:n}};let T={tmp_successCallback:null,tmp_errorCallback:null,tmp_options:null,tmp2_successCallback:null,tmp2_errorCallback:null,tmp2_options:null,getCurrentPosition(e,t,n){this.tmp_successCallback=t=>w(e,t),this.tmp_errorCallback=t,this.tmp_options=n,S()},watchPosition(e,t,n){return this.tmp2_successCallback=t=>w(e,t),this.tmp2_errorCallback=t,this.tmp2_options=n,C()},clearWatch(e){let t=p.get(e);t?(t.realWatchId!==void 0&&a(t.realWatchId),p.delete(e)):e<m&&g.add(e)}},E=Object.getOwnPropertyDescriptor(navigator,`geolocation`);if(!E||E.configurable)try{Object.defineProperty(navigator,"geolocation",{value:T,configurable:!1,writable:!1})}catch{D()}else D();function D(){if(navigator.geolocation)try{navigator.geolocation.getCurrentPosition=T.getCurrentPosition.bind(T),navigator.geolocation.watchPosition=T.watchPosition.bind(T),navigator.geolocation.clearWatch=T.clearWatch.bind(T)}catch{}}let O=(e,t)=>{let n=Function.bind;return new(n.bind(n)(e,null).apply(null,t))};Blob=(function(t){function n(...n){let r=[{mime:`text/html`,useXMLparser:!1},{mime:`application/xhtml+xml`,useXMLparser:!0},{mime:`text/xml`,useXMLparser:!0},{mime:`application/xml`,useXMLparser:!0},{mime:`image/svg+xml`,useXMLparser:!0}],i=n.find(e=>typeof e==`object`&&typeof e.type==`string`&&e.type);if(i!==void 0&&typeof n[0][0]==`string`){let t=r.findIndex(e=>e.mime.toLowerCase()===i.type.toLowerCase());if(t>=0){let a=r[t],o=new DOMParser,s;if(s=a.useXMLparser===!0?o.parseFromString(n[0].join(``),a.mime):o.parseFromString(n[0][0],a.mime),s.getElementsByTagName(`parsererror`).length===0){if(i.type===`image/svg+xml`){let t=s.createElementNS(`http://www.w3.org/2000/svg`,`script`);t.setAttributeNS(null,`type`,`application/ecmascript`),t.innerHTML=`(${e})();`,s.documentElement.insertBefore(t,s.documentElement.firstChild)}else{let t=`
+								<script>(
+									${e}
+								)();
+								<\/script>
+							`;s.documentElement.insertAdjacentHTML(`afterbegin`,t)}a.useXMLparser===!0?n[0]=[new XMLSerializer().serializeToString(s)]:n[0][0]=s.documentElement.outerHTML}}}return O(t,n)}let r=Object.getOwnPropertyNames(t);for(let e=0;e<r.length;e++){let i=r[e];i in n||Object.defineProperty(n,i,Object.getOwnPropertyDescriptor(t,i))}return n.prototype=t.prototype,n})(Blob);function k(e){if(typeof e!=`object`||!e||typeof e.fakeIt!=`boolean`)return;let t=typeof e.coords==`object`&&e.coords!==null&&typeof e.coords.lat==`number`&&typeof e.coords.lon==`number`;if(e.fakeIt&&!t)return;let n=v(),r=c,i=d;l=t?e.coords.lat:void 0,u=t?e.coords.lon:void 0,c=e.fakeIt,d=!0,h={lat:l,lon:u},i&&r!==c&&b(),i&&(n||r!==c)&&y()}function A(e){e!==void 0&&document.addEventListener(e,function(e){try{k(JSON.parse(e.detail))}catch{}})}return A(t),A}
+								)();
+								</script>
+							<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_standard" name="shell-type">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+@layer base{
+  html,body{margin:0;padding:0;}
+  body{overscroll-behavior:none;}
+  main>:first-child{margin-top:0!important;}
+  main>:last-child{margin-bottom:0!important;}
+}
+::-webkit-scrollbar{display:none;}
+.phone {
+  width: 390px;
+  height: 844px;
+  border: 12px solid #111;
+  border-radius: 48px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  margin: 0 auto;
+  background: #000;
+}
+.phone iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+@media (max-width: 480px) {
+  .phone {
+    transform: scale(0.85);
+    transform-origin: top center;
+  }
+}
+
+@keyframes scanSweep {
+  0% { transform: translateY(0%); opacity: 0.9; }
+  50% { transform: translateY(180px); opacity: 0.6; }
+  100% { transform: translateY(0%); opacity: 0.9; }
+}
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes pulseRing {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.08); opacity: 0.3; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+.scan-line {
+  animation: scanSweep 3.2s ease-in-out infinite;
+}
+.float-effect {
+  animation: floatGentle 5s ease-in-out infinite;
+}
+</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-secondary-container": "#005f70",
+        "inverse-on-surface": "#e9f1ff",
+        "tertiary": "#934300",
+        "secondary": "#00687a",
+        "surface-container-high": "#dae9ff",
+        "primary-fixed": "#d8e2ff",
+        "on-tertiary-container": "#fff8f5",
+        "on-primary-container": "#f9f9ff",
+        "error": "#ba1a1a",
+        "error-container": "#ffdad6",
+        "primary": "#0056bb",
+        "surface-container-highest": "#d4e4fa",
+        "on-tertiary-fixed": "#321200",
+        "tertiary-fixed-dim": "#ffb68c",
+        "surface-variant": "#d4e4fa",
+        "on-secondary": "#ffffff",
+        "surface": "#f8f9ff",
+        "on-error-container": "#93000a",
+        "on-primary": "#ffffff",
+        "outline-variant": "#c2c6d5",
+        "primary-fixed-dim": "#aec6ff",
+        "surface-bright": "#f8f9ff",
+        "surface-dim": "#ccdbf2",
+        "on-surface-variant": "#424753",
+        "on-background": "#0d1d2d",
+        "tertiary-fixed": "#ffdbc9",
+        "on-primary-fixed-variant": "#004395",
+        "on-tertiary-fixed-variant": "#753400",
+        "surface-tint": "#005ac3",
+        "inverse-primary": "#aec6ff",
+        "secondary-fixed": "#adecff",
+        "background": "#f8f9ff",
+        "on-surface": "#0d1d2d",
+        "secondary-fixed-dim": "#41d7f9",
+        "inverse-surface": "#233242",
+        "on-secondary-fixed-variant": "#004e5d",
+        "on-secondary-fixed": "#001f26",
+        "on-error": "#ffffff",
+        "surface-container-low": "#eef4ff",
+        "on-tertiary": "#ffffff",
+        "primary-container": "#2a6fdb",
+        "surface-container": "#e4efff",
+        "tertiary-container": "#b95600",
+        "surface-container-lowest": "#ffffff",
+        "secondary-container": "#49ddff",
+        "on-primary-fixed": "#001a42",
+        "outline": "#727784"
+      },
+      borderRadius: {
+        "DEFAULT": "0.25rem",
+        "lg": "0.5rem",
+        "xl": "0.75rem",
+        "full": "9999px"
+      },
+      spacing: {
+        "space-xs": "0.25rem",
+        "gutter": "1rem",
+        "space-lg": "1.5rem",
+        "margin": "1rem",
+        "space-xl": "2rem",
+        "space-md": "1rem",
+        "margin-desktop": "2.5rem",
+        "margin-tablet": "1.5rem",
+        "space-sm": "0.5rem",
+        "space-2xl": "3rem"
+      },
+      fontFamily: {
+        "label-lg": ["Inter", "sans-serif"],
+        "headline-lg": ["Space Grotesk", "sans-serif"],
+        "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
+        "display-hero": ["Space Grotesk", "sans-serif"],
+        "label-sm": ["Inter", "sans-serif"],
+        "metric-stat": ["Space Grotesk", "sans-serif"],
+        "body-md": ["Inter", "sans-serif"],
+        "body-sm": ["Inter", "sans-serif"],
+        "headline-md": ["Space Grotesk", "sans-serif"],
+        "display-hero-mobile": ["Space Grotesk", "sans-serif"],
+        "body-lg": ["Inter", "sans-serif"],
+        "body-md-medium": ["Inter", "sans-serif"]
+      },
+      fontSize: {
+        "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-lg-mobile": ["26px", { lineHeight: "34px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "700" }],
+        "label-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+        "metric-stat": ["48px", { lineHeight: "52px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "body-md": ["15px", { lineHeight: "22px", fontWeight: "400" }],
+        "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+        "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "display-hero-mobile": ["38px", { lineHeight: "46px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+        "body-md-medium": ["15px", { lineHeight: "22px", fontWeight: "500" }]
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-[#F8FAFD] font-body-md text-body-md text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-xl border-b border-surface-container/60 shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+<div class="h-20 max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
+<a class="flex items-center gap-space-sm group" href="#">
+<div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center p-1.5 transition-transform group-hover:scale-105">
+<img alt="Skylens Aperture Logo" class="h-full w-auto object-contain" src="assets/logo.png">
+</div>
+<span class="font-headline-md text-headline-md text-on-surface tracking-tight">Skylens</span>
+</a>
+<nav class="hidden md:flex items-center gap-1 p-1 rounded-full bg-surface-container-low border border-surface-container/70">
+<a class="px-space-md py-space-sm rounded-full bg-white text-primary font-label-lg text-label-lg shadow-sm" href="#">Overview</a>
+<a class="px-space-md py-space-sm rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" href="#the-problem">The Problem</a>
+<a class="px-space-md py-space-sm rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" href="#how-it-works">How It Works</a>
+<a class="px-space-md py-space-sm rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" href="#map">Map</a>
+<a class="px-space-md py-space-sm rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" href="#live-demo">Live Demo</a>
+</nav>
+<div class="flex items-center gap-space-sm">
+<a class="inline-flex items-center justify-center min-h-[44px] px-space-lg rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:shadow-md transition-all duration-200" href="#live-demo">
+        Try Demo
+      </a>
+<div class="w-9 h-9 rounded-full bg-surface-container-high border border-surface-container flex items-center justify-center text-primary font-semibold text-sm">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full pt-20">
+<div class="flex flex-col w-full">
+<!-- SECTION 1: HERO (LIGHT ATMOSPHERIC THEME + INTERACTIVE SIMULATOR) -->
+<section class="relative w-full overflow-hidden bg-gradient-to-b from-[#EFF6FF] via-[#F4F8FD] to-[#FFFFFF] py-space-2xl md:py-20 border-b border-surface-container/50">
+<!-- Atmospheric Ambient Backdrops & Streamlines -->
+<div class="pointer-events-none absolute -top-24 right-[-5%] w-[620px] h-[620px] rounded-full bg-sky-200/40 blur-[130px]"></div>
+<div class="pointer-events-none absolute top-1/2 left-[-8%] w-[480px] h-[480px] rounded-full bg-blue-100/50 blur-[110px]"></div>
+<!-- Flowing air SVG waves -->
+<div class="pointer-events-none absolute inset-0 opacity-25">
+<svg class="w-full h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1200 600">
+<path d="M-100 200 C300 120 500 350 900 180 C1100 100 1300 250 1400 220" stroke="#0056bb" stroke-dasharray="6 8" stroke-width="1.5"></path>
+<path d="M-50 340 C350 260 650 480 1000 320 C1200 240 1350 360 1450 310" stroke="#00687a" stroke-dasharray="4 6" stroke-width="1.2"></path>
+</svg>
+</div>
+<div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
+<!-- Hero Text Column -->
+<div class="lg:col-span-7 flex flex-col items-start">
+<!-- Hackathon Track Pill -->
+<div class="inline-flex items-center gap-space-sm px-space-md py-1.5 rounded-full bg-white border border-blue-200/80 shadow-sm mb-space-md">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(0,86,187,0.5)]"></span>
+<span class="font-label-sm text-label-sm text-primary font-bold tracking-wide uppercase">AWS Hackathon 2025 • Environmental AI Track</span>
+</div>
+<!-- Main Headline & Concise Subtitle -->
+<h1 class="font-display-hero text-display-hero-mobile md:text-display-hero text-on-surface tracking-tight mt-1 mb-space-sm">
+            Read the air<br class="hidden sm:inline"><span class="text-primary"> from a photo.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl leading-relaxed mb-space-lg">
+            Real-time hyperlocal air quality estimates powered by everyday smartphone photos.
+          </p>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center gap-space-md w-full sm:w-auto mb-space-xl">
+<a class="inline-flex items-center justify-center min-h-[48px] px-space-xl rounded-full bg-primary text-white font-label-lg text-label-lg hover:bg-primary-container transition-all duration-200 shadow-md hover:shadow-lg" href="#live-demo">
+<span class="material-symbols-outlined text-[20px] mr-2">photo_camera</span>
+              Try Instant Demo
+            </a>
+<a class="inline-flex items-center justify-center min-h-[48px] px-space-xl rounded-full bg-white text-on-surface font-label-lg text-label-lg hover:bg-surface-container-low transition-all duration-200 border border-outline-variant shadow-sm" href="#map">
+<span class="material-symbols-outlined text-[20px] mr-2">explore</span>
+              Explore Live Map
+            </a>
+</div>
+<!-- Realtime Fast Metrics Bar -->
+<div class="w-full grid grid-cols-3 gap-space-md pt-space-lg border-t border-surface-container">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block font-medium">Inference Speed</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">380ms</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block font-medium">Micro-Resolution</span>
+<span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">&lt;250m</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block font-medium">Sensor Anchor</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">CPCB + EPA</span>
+</div>
+</div>
+</div>
+<!-- Interactive Hero Visual: Live Sky Scanner Simulator Widget -->
+<div class="lg:col-span-5 w-full">
+<div class="bg-white/95 rounded-3xl p-5 shadow-[0_16px_40px_rgba(0,86,187,0.1)] border border-blue-100 float-effect relative">
+<!-- Widget Header -->
+<div class="flex items-center justify-between pb-3 border-b border-surface-container mb-3">
+<div class="flex items-center gap-2">
+<span class="flex h-2.5 w-2.5 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+</span>
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Optical Vision Core</span>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-surface-container text-primary font-semibold">Active Model v2.4</span>
+</div>
+<!-- Toggle Sample Photo State Buttons -->
+<div class="grid grid-cols-3 gap-1.5 p-1 bg-surface-container-low rounded-xl mb-3">
+<button class="sample-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-semibold transition-all duration-200 bg-white text-on-surface shadow-xs text-center" id="toggle-clear" onclick="setScannerState('clear')">
+                Clear Sky
+              </button>
+<button class="sample-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-semibold transition-all duration-200 text-on-surface-variant hover:text-on-surface text-center" id="toggle-hazy" onclick="setScannerState('hazy')">
+                Hazy Urban
+              </button>
+<button class="sample-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-semibold transition-all duration-200 text-on-surface-variant hover:text-on-surface text-center" id="toggle-smog" onclick="setScannerState('smog')">
+                Smog Plume
+              </button>
+</div>
+<!-- Viewfinder Simulation Box -->
+<div class="relative h-[220px] rounded-2xl overflow-hidden bg-cover bg-center transition-all duration-500 shadow-inner flex flex-col justify-between p-3.5" id="scanner-viewport" style="background-image: url('assets/hero-sky.jpg');">
+<!-- Overlay Tint for environmental simulation -->
+<div class="absolute inset-0 bg-transparent transition-colors duration-500 pointer-events-none" id="sky-filter-overlay"></div>
+<!-- Animated Scanner Laser Line -->
+<div class="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#49ddff] to-transparent scan-line pointer-events-none shadow-[0_0_8px_#49ddff]"></div>
+<!-- Target Reticles -->
+<div class="absolute inset-3 pointer-events-none flex flex-col justify-between">
+<div class="flex justify-between">
+<div class="w-4 h-4 border-t-2 border-l-2 border-white/90"></div>
+<div class="w-4 h-4 border-t-2 border-r-2 border-white/90"></div>
+</div>
+<!-- Optical Horizon Line -->
+<div class="w-full flex items-center justify-center gap-1.5">
+<div class="w-12 h-[1px] bg-white/70"></div>
+<span class="text-[10px] text-white/90 font-mono tracking-widest uppercase">HORIZON REF</span>
+<div class="w-12 h-[1px] bg-white/70"></div>
+</div>
+<div class="flex justify-between">
+<div class="w-4 h-4 border-b-2 border-l-2 border-white/90"></div>
+<div class="w-4 h-4 border-b-2 border-r-2 border-white/90"></div>
+</div>
+</div>
+<!-- Top Telemetry Pill -->
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white font-mono text-[11px]" id="scanner-coords">
+                  AZ 142° • ELEV 38°
+                </span>
+<span class="px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white font-mono text-[11px]" id="scanner-lux">
+                  42,000 LUX
+                </span>
+</div>
+<!-- Bottom Optical Depth Badge -->
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white font-label-sm text-label-sm" id="optical-depth-label">
+                  Optical Depth (AOD): <span class="font-bold text-sky-300" id="aod-val">0.14</span>
+</span>
+<span class="px-2 py-0.5 rounded bg-white/90 text-on-surface font-label-sm text-[11px] font-bold">
+                  LIVE FRAME
+                </span>
+</div>
+</div>
+<!-- Dynamic AQI Meter Bar Result -->
+<div class="mt-3 p-3 bg-surface-container-low rounded-xl flex items-center justify-between transition-colors" id="gauge-container">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Estimated AQI</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold tracking-tight text-[#008a00]" id="aqi-score">32</span>
+<span class="font-label-lg text-label-lg font-bold text-[#008a00]" id="aqi-category">Good Air Quality</span>
+</div>
+</div>
+<!-- Status Icon Badge -->
+<div class="w-12 h-12 rounded-xl bg-white shadow-xs flex items-center justify-center" id="aqi-icon-badge">
+<span class="material-symbols-outlined text-[28px] text-[#008a00]" id="aqi-icon">eco</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: THE PROBLEM (STREAMLINED & CRISP) -->
+<section class="w-full bg-white py-space-2xl" id="the-problem">
+<div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+<div class="max-w-2xl mb-space-xl">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="inline-block w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Coverage Gap</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">The Air Monitoring Blind Spot</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Official stations cost $20k+ and sit kilometers apart, missing local smoke, highway exhaust, and neighborhood microclimates.
+        </p>
+</div>
+<!-- Problem vs Solution Comparison Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Official Grid Card -->
+<div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container flex flex-col justify-between hover:shadow-sm transition-shadow">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="px-3 py-1 rounded-full bg-white text-on-surface-variant font-label-sm text-label-sm font-medium">Standard Monitoring</span>
+<span class="material-symbols-outlined text-outline">radar</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Official Sensor Stations</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+              Highly accurate but spaced 10–30 km apart. They miss street canyons, school zones, and transient pollution bursts.
+            </p>
+</div>
+<div class="bg-white rounded-xl p-space-md border border-surface-container">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm mb-1.5">
+<span class="">Grid Coverage</span>
+<span class="text-error font-bold">16% Urban Span</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-error rounded-full w-[16%]"></div>
+</div>
+</div>
+</div>
+<!-- Skylens Vision Card -->
+<div class="bg-blue-50/70 rounded-2xl p-6 border border-blue-200/80 flex flex-col justify-between hover:shadow-sm transition-shadow">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="px-3 py-1 rounded-full bg-primary text-white font-label-sm text-label-sm font-semibold">Skylens Vision</span>
+<span class="material-symbols-outlined text-primary">smartphone</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Crowdsourced Street Optics</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+              Every photo measures sunlight attenuation and atmospheric haze to deliver high-resolution street-level estimates.
+            </p>
+</div>
+<div class="bg-white rounded-xl p-space-md border border-blue-100">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm mb-1.5">
+<span class="">Micro-Grid Resolution</span>
+<span class="text-primary font-bold">Sub-250m Street Precision</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[92%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: HOW IT WORKS (ANIMATED 3 CARDS) -->
+<section class="w-full bg-surface-container-low/50 py-space-2xl" id="how-it-works">
+<div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+<div class="flex items-center justify-between mb-space-xl">
+<div>
+<div class="flex items-center gap-space-xs mb-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Process Pipeline</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">How Skylens Works</h2>
+</div>
+<span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-white text-secondary font-label-sm text-label-sm font-semibold border border-secondary/20">
+          Zero Extra Hardware Required
+        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Step 1: Snap -->
+<div class="group bg-white rounded-2xl p-6 shadow-sm border border-surface-container/80 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-11 h-11 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-headline-md font-bold group-hover:scale-105 transition-transform">
+                1
+              </div>
+<span class="material-symbols-outlined text-primary text-[28px]">photo_camera</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Snap</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Frame any portion of the daytime horizon. Our live alignment guide secures sun azimuth and optical depth.
+            </p>
+</div>
+<div class="mt-space-lg pt-3 border-t border-surface-container flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+            Automatic GPS &amp; sun-angle lock
+          </div>
+</div>
+<!-- Step 2: Estimate -->
+<div class="group bg-white rounded-2xl p-6 shadow-sm border border-surface-container/80 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-11 h-11 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-headline-md font-bold group-hover:scale-105 transition-transform">
+                2
+              </div>
+<span class="material-symbols-outlined text-secondary text-[28px]">filter_drama</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Estimate</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Optical AI models infer aerosol optical depth and particulate density calibrated against official stations.
+            </p>
+</div>
+<div class="mt-space-lg pt-3 border-t border-surface-container flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
+            Sub-second neural inference
+          </div>
+</div>
+<!-- Step 3: Share -->
+<div class="group bg-white rounded-2xl p-6 shadow-sm border border-surface-container/80 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-11 h-11 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center font-headline-md font-bold group-hover:scale-105 transition-transform">
+                3
+              </div>
+<span class="material-symbols-outlined text-primary-container text-[28px]">route</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Share &amp; Navigate</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Readings populate live community maps, helping pedestrians choose cleaner, low-exposure routes.
+            </p>
+</div>
+<div class="mt-space-lg pt-3 border-t border-surface-container flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary-container">check_circle</span>
+            Anonymized spatial mesh update
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: THE MAP SECTION (BANGALORE MAP + INTERACTIVE ZONE FILTER) -->
+<section class="w-full bg-white py-space-2xl" id="map">
+<div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-space-lg gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs mb-1">
+<span class="inline-block w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Crowdsourced Cartography</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Bengaluru City Air Map</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 max-w-xl">
+            Live crowdsourced AQI readings across major Bangalore corridors with clean route recommendations.
+          </p>
+</div>
+<!-- Interactive City Zone Filter Pills -->
+<div class="flex flex-wrap gap-2">
+<button class="zone-pill min-h-[44px] px-3.5 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-white shadow-xs" id="zone-all" onclick="highlightZone('all')">
+            All Sectors
+          </button>
+<button class="zone-pill min-h-[44px] px-3.5 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-surface-container-low text-on-surface hover:bg-surface-container" id="zone-cubbon" onclick="highlightZone('cubbon')">
+            Cubbon Park (AQI 42)
+          </button>
+<button class="zone-pill min-h-[44px] px-3.5 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-surface-container-low text-on-surface hover:bg-surface-container" id="zone-indiranagar" onclick="highlightZone('indiranagar')">
+            Indiranagar (AQI 88)
+          </button>
+<button class="zone-pill min-h-[44px] px-3.5 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-surface-container-low text-on-surface hover:bg-surface-container" id="zone-whitefield" onclick="highlightZone('whitefield')">
+            Whitefield (AQI 154)
+          </button>
+</div>
+</div>
+<!-- Map Graphic Canvas Container -->
+<div class="bg-surface-container-lowest rounded-3xl shadow-md border border-surface-container overflow-hidden relative">
+<!-- Bangalore Map Image with Interactive Zone Highlights -->
+<div class="relative w-full overflow-hidden bg-slate-50">
+<img alt="Bangalore Air Quality Index Map Graphic" class="w-full h-auto min-h-[380px] max-h-[560px] object-cover transition-transform duration-500" id="bengaluru-map-img" src="assets/bengaluru-map.jpg">
+<!-- Dynamic Zone Details Callout Card Floating over the map -->
+<div class="absolute bottom-5 left-5 z-20 max-w-sm bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-blue-100 transition-all duration-300" id="zone-popup">
+<div class="flex items-center justify-between mb-1.5">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-bold text-white bg-[#008a00]" id="popup-badge">AQI 42 • Good</span>
+<span class="text-xs text-on-surface-variant font-mono">14 scans in last hour</span>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface font-bold leading-tight" id="popup-title">Cubbon Park Green Sanctuary</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="popup-desc">
+              Thick foliage dampens road emissions. Recommended for running and cycling commutes.
+            </p>
+<div class="mt-2 pt-2 border-t border-surface-container flex items-center justify-between">
+<span class="text-[12px] font-semibold text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">navigation</span>
+                -41% Particulate Exposure Route
+              </span>
+<span class="text-[12px] text-on-surface-variant font-medium">+4 mins via Park</span>
+</div>
+</div>
+</div>
+<!-- AQI Category Standard Color Spectrum Legend -->
+<div class="p-4 bg-surface-container-low/80 border-t border-surface-container flex flex-col md:flex-row items-center justify-between gap-3">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Standard AQI Health Scale:</span>
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-bold bg-[#00E400] text-[#0B1B2B]">
+              Good 0-50
+            </span>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-bold bg-[#FFFF00] text-[#0B1B2B]">
+              Moderate 51-100
+            </span>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-bold bg-[#FF7E00] text-[#0B1B2B]">
+              Sensitive 101-150
+            </span>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-bold bg-[#FF0000] text-white">
+              Unhealthy 151-200
+            </span>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-bold bg-[#8F3F97] text-white">
+              Very Unhealthy 201+
+            </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: LIVE DEMO (REAL FLUTTER APP IN A PHONE FRAME) -->
+<section class="w-full bg-surface-container-low/50 py-space-2xl" id="live-demo">
+  <div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="text-center max-w-2xl mx-auto mb-space-xl">
+      <span class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-white border border-blue-200/80 shadow-sm mb-space-md">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">Live Demo</span>
+      </span>
+      <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Try it right here</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        This is the real app on the real AWS backend. Tap <strong>Demo scan</strong>, pick a sample sky, and watch the pipeline run &mdash; no camera or GPS permission needed.
+      </p>
+    </div>
+    <div class="flex flex-col items-center">
+      <div class="phone">
+        <iframe src="/app/" title="Air quality app demo" loading="lazy" allow="camera; geolocation; microphone"></iframe>
+      </div>
+      <p class="mt-space-lg font-label-sm text-label-sm text-on-surface-variant text-center max-w-md">
+        Demo mode uses bundled sample photos and a fixed Bengaluru location, so the live scan exercises the real upload &rarr; model &rarr; map pipeline without permission prompts.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: ARCHITECTURE -->
+<section class="w-full bg-white py-space-2xl" id="architecture">
+  <div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="max-w-2xl mb-space-xl">
+      <div class="flex items-center gap-space-xs mb-1">
+        <span class="inline-block w-2 h-2 rounded-full bg-primary"></span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">How it is built</span>
+      </div>
+      <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Architecture</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        A single Flutter client talks to a serverless AWS backend. Every photo is scored by a vision model, fused with official stations, and written to a geohash grid that powers the map and routing.
+      </p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-3xl border border-surface-container p-6 md:p-8 overflow-x-auto">
+      <div class="flex flex-col md:flex-row items-stretch gap-space-md min-w-[720px]">
+        <div class="flex-1 bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center mb-3">
+            <span class="material-symbols-outlined text-primary">smartphone</span>
+          </div>
+          <h4 class="font-headline-md text-[16px] text-on-surface mb-1">Flutter app</h4>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Scan, Map, Route, Coach. Web build in the phone frame above.</p>
+        </div>
+        <div class="hidden md:flex items-center text-primary"><span class="material-symbols-outlined text-2xl">arrow_forward</span></div>
+        <div class="flex-1 bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center mb-3">
+            <span class="material-symbols-outlined text-secondary">hub</span>
+          </div>
+          <h4 class="font-headline-md text-[16px] text-on-surface mb-1">API Gateway</h4>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">HTTP API with a Cognito JWT authorizer and CORS for the web origin.</p>
+        </div>
+        <div class="hidden md:flex items-center text-primary"><span class="material-symbols-outlined text-2xl">arrow_forward</span></div>
+        <div class="flex-1 bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center mb-3">
+            <span class="material-symbols-outlined text-tertiary">bolt</span>
+          </div>
+          <h4 class="font-headline-md text-[16px] text-on-surface mb-1">Lambda functions</h4>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">upload-url, scan, map, route, coach &mdash; plus a Cognito guest trigger.</p>
+        </div>
+        <div class="hidden md:flex items-center text-primary"><span class="material-symbols-outlined text-2xl">arrow_forward</span></div>
+        <div class="flex-1 bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center mb-3">
+            <span class="material-symbols-outlined">storage</span>
+          </div>
+          <h4 class="font-headline-md text-[16px] text-on-surface mb-1">Data &amp; model</h4>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">S3 images, DynamoDB grid, SageMaker vision model, Bedrock coach.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+<!-- SECTION 7: BUILT WITH AWS -->
+<section class="w-full bg-surface-container-low/50 py-space-2xl" id="aws">
+  <div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="max-w-2xl mb-space-xl">
+      <div class="flex items-center gap-space-xs mb-1">
+        <span class="inline-block w-2 h-2 rounded-full bg-primary"></span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Built with AWS</span>
+      </div>
+      <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Seven services, one job each</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">Everything runs serverless, so there is nothing to keep alive between demos.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-space-md" id="aws-grid">
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">Cognito</span>
+          <span class="px-2 py-0.5 rounded-full bg-primary text-white font-label-sm text-[10px] font-bold">Build it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Guest sign-in so judges can try instantly without an account.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">API Gateway</span>
+          <span class="px-2 py-0.5 rounded-full bg-primary text-white font-label-sm text-[10px] font-bold">Build it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Single HTTPS entry point that checks JWTs and applies CORS.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">Lambda</span>
+          <span class="px-2 py-0.5 rounded-full bg-primary text-white font-label-sm text-[10px] font-bold">Build it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">One function per endpoint; scales to zero when idle.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">DynamoDB</span>
+          <span class="px-2 py-0.5 rounded-full bg-secondary text-white font-label-sm text-[10px] font-bold">Ship it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Scans and geohash cells; the map and routing read straight from it.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">S3</span>
+          <span class="px-2 py-0.5 rounded-full bg-secondary text-white font-label-sm text-[10px] font-bold">Ship it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Private bucket for photos and the model artifact, with a 30-day expiry.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">SageMaker</span>
+          <span class="px-2 py-0.5 rounded-full bg-secondary text-white font-label-sm text-[10px] font-bold">Ship it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Serverless endpoint running the sky-photo AQI classifier.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-headline-md text-[15px] text-on-surface">Bedrock</span>
+          <span class="px-2 py-0.5 rounded-full bg-secondary text-white font-label-sm text-[10px] font-bold">Ship it</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Powers the Air Coach, with a canned reply if the model is unavailable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8: HONEST LIMITATIONS -->
+<section class="w-full bg-white py-space-2xl" id="limitations">
+  <div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="max-w-2xl mb-space-xl">
+      <div class="flex items-center gap-space-xs mb-1">
+        <span class="inline-block w-2 h-2 rounded-full bg-tertiary"></span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold">Honest limitations</span>
+      </div>
+      <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">What this is, and is not</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+      <div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container">
+        <h4 class="font-headline-md text-[16px] text-on-surface mb-2">Estimates, not measurements</h4>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">A sky photo gives an optical estimate of particulates, not a calibrated ground sensor reading.</p>
+      </div>
+      <div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container">
+        <h4 class="font-headline-md text-[16px] text-on-surface mb-2">Model accuracy varies</h4>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">The classifier is accurate to about one AQI band, not to a single number. We show a confidence range, not false precision.</p>
+      </div>
+      <div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container">
+        <h4 class="font-headline-md text-[16px] text-on-surface mb-2">Coverage is thin</h4>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">The map is only as good as the crowdsourced scans in an area. Seeded data fills the gaps and is labelled as such.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 9: TEAM & LINKS -->
+<section class="w-full bg-surface-container-low/50 py-space-2xl" id="team">
+  <div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-space-lg">
+      <div>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface mb-1">Team &amp; links</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">Built for the AWS Open-Source Environmental AI Hackathon.</p>
+      </div>
+      <div class="flex flex-wrap gap-space-md">
+        <a href="https://github.com/Naveen-Kumar-Murugan/air-quality-app" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 min-h-[44px] px-space-lg rounded-full bg-white text-on-surface font-label-lg text-label-lg border border-outline-variant hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-[20px]">code</span> Source
+        </a>
+        <a href="#live-demo"
+           class="inline-flex items-center gap-2 min-h-[44px] px-space-lg rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container transition-colors">
+          <span class="material-symbols-outlined text-[20px]">photo_camera</span> Try the demo
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="w-full bg-white border-t border-surface-container py-space-xl">
+<div class="max-w-[1160px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center p-1">
+<img alt="Skylens Aperture Logo" class="h-full w-auto object-contain" src="assets/logo.png">
+</div>
+<span class="font-headline-md text-[18px] text-on-surface">Skylens</span>
+<span class="text-xs text-on-surface-variant ml-2">© 2025 • Open-Source Environmental AI Hackathon</span>
+</div>
+<div class="flex flex-wrap items-center gap-space-md text-body-sm font-medium text-on-surface-variant">
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#the-problem">The Problem</a>
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#how-it-works">How It Works</a>
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#map">Bengaluru Map</a>
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#live-demo">Live Demo</a>
+</div>
+</div>
+</footer>
+<!-- SCRIPT: INTERACTIVE CONTROLS -->
+<script>
+// 1. HERO SCANNER SIMULATOR STATE
+const scannerConfigs = {
+  clear: {
+    aod: "0.12",
+    lux: "45,200 LUX",
+    az: "AZ 134° • ELEV 42°",
+    aqi: 32,
+    category: "Good Air Quality",
+    color: "#008a00",
+    bgClass: "bg-green-50",
+    icon: "eco",
+    tint: "rgba(0, 200, 100, 0.05)"
+  },
+  hazy: {
+    aod: "0.48",
+    lux: "28,400 LUX",
+    az: "AZ 152° • ELEV 35°",
+    aqi: 118,
+    category: "Sensitive Groups",
+    color: "#c76300",
+    bgClass: "bg-amber-50",
+    icon: "warning",
+    tint: "rgba(255, 140, 0, 0.18)"
+  },
+  smog: {
+    aod: "0.89",
+    lux: "14,800 LUX",
+    az: "AZ 168° • ELEV 28°",
+    aqi: 165,
+    category: "Unhealthy Air",
+    color: "#ba1a1a",
+    bgClass: "bg-red-50",
+    icon: "masks",
+    tint: "rgba(180, 20, 20, 0.28)"
+  }
+};
+
+function setScannerState(state) {
+  const conf = scannerConfigs[state];
+  if (!conf) return;
+
+  // Toggle button styles
+  document.querySelectorAll('.sample-btn').forEach(btn => {
+    btn.classList.remove('bg-white', 'text-on-surface', 'shadow-xs');
+    btn.classList.add('text-on-surface-variant');
+  });
+  const activeBtn = document.getElementById(`toggle-${state}`);
+  if (activeBtn) {
+    activeBtn.classList.add('bg-white', 'text-on-surface', 'shadow-xs');
+    activeBtn.classList.remove('text-on-surface-variant');
+  }
+
+  // Update Telemetry values
+  document.getElementById('aod-val').innerText = conf.aod;
+  document.getElementById('scanner-lux').innerText = conf.lux;
+  document.getElementById('scanner-coords').innerText = conf.az;
+
+  // Update Dynamic Overlay tint
+  document.getElementById('sky-filter-overlay').style.backgroundColor = conf.tint;
+
+  // Update Gauge Card
+  const scoreEl = document.getElementById('aqi-score');
+  const catEl = document.getElementById('aqi-category');
+  const iconEl = document.getElementById('aqi-icon');
+
+  scoreEl.innerText = conf.aqi;
+  scoreEl.style.color = conf.color;
+  catEl.innerText = conf.category;
+  catEl.style.color = conf.color;
+  iconEl.innerText = conf.icon;
+  iconEl.style.color = conf.color;
+}
+
+// 2. BANGALORE MAP ZONE HIGHLIGHT INTERACTION
+const zoneDetails = {
+  all: {
+    title: "Bengaluru Metropolitan Grid",
+    badge: "Active Grid: 1,420 Scans",
+    badgeColor: "#0056bb",
+    desc: "Composite sensor mesh displaying real-time optical estimates across central, eastern, and southern corridors."
+  },
+  cubbon: {
+    title: "Cubbon Park Green Canopy",
+    badge: "AQI 42 • Good",
+    badgeColor: "#008a00",
+    desc: "Dense tree cover absorbs particulate matter. Cleaner pedestrian routes running east towards MG Road."
+  },
+  indiranagar: {
+    title: "Indiranagar 100ft & CMH Rd",
+    badge: "AQI 88 • Moderate",
+    badgeColor: "#c76300",
+    desc: "Moderate traffic concentration with elevated vehicle exhaust near arterial junctions. Ventilation improves in residential cross streets."
+  },
+  whitefield: {
+    title: "Whitefield Tech Corridor",
+    badge: "AQI 154 • Unhealthy",
+    badgeColor: "#ba1a1a",
+    desc: "Major road construction and diesel vehicle density contribute to elevated PM2.5 readings. Avoid prolonged exertion during rush hours."
+  }
+};
+
+function highlightZone(zoneKey) {
+  // Toggle pills
+  document.querySelectorAll('.zone-pill').forEach(pill => {
+    pill.classList.remove('bg-primary', 'text-white', 'shadow-xs');
+    pill.classList.add('bg-surface-container-low', 'text-on-surface');
+  });
+  const activePill = document.getElementById(`zone-${zoneKey}`);
+  if (activePill) {
+    activePill.classList.add('bg-primary', 'text-white', 'shadow-xs');
+    activePill.classList.remove('bg-surface-container-low', 'text-on-surface');
+  }
+
+  // Update popup card
+  const data = zoneDetails[zoneKey];
+  if (data) {
+    document.getElementById('popup-title').innerText = data.title;
+    document.getElementById('popup-desc').innerText = data.desc;
+    const badge = document.getElementById('popup-badge');
+    badge.innerText = data.badge;
+    badge.style.backgroundColor = data.badgeColor;
+  }
+}
+
+// 3. PHONE TAB TOGGLING
+function setPhoneTab(tab) {
+  document.querySelectorAll('.phone-screen-pane').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.phone-tab-btn').forEach(btn => {
+    btn.classList.remove('text-primary', 'font-bold');
+    btn.classList.add('text-slate-400');
+  });
+
+  const activePane = document.getElementById(`phone-view-${tab}`);
+  if (activePane) activePane.classList.remove('hidden');
+
+  const activeTabBtn = document.getElementById(`tab-${tab}`);
+  if (activeTabBtn) {
+    activeTabBtn.classList.add('text-primary', 'font-bold');
+    activeTabBtn.classList.remove('text-slate-400');
+  }
+}
+
+function triggerPhoneCapture() {
+  const shutter = document.querySelector('button[aria-label="Capture Photo"]');
+  shutter.classList.add('scale-90');
+  setTimeout(() => {
+    shutter.classList.remove('scale-90');
+    alert("Photo captured! Optical aerosol analysis complete: AQI 42 (Good). Reading added to community map.");
+  }, 180);
+}
+</script>
+
+
+</body></html>
