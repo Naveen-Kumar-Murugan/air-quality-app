@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:camera/camera.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,6 +11,7 @@ import 'dart:typed_data';
 import 'scan_service.dart';
 import '../auth/auth_service.dart';
 import '../../core/api_client.dart';
+import '../../core/demo_config.dart';
 import 'result_screen.dart';
 import '../map/map_service.dart';
 
@@ -28,6 +31,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
   double? _gpsAccuracy;
   Timer? _sensorTimer;
   late AnimationController _pulseController;
+  DemoSample? _demoSelectedSample;
 
   final List<Map<String, dynamic>> _tags = [
     {'label': 'Roadside', 'icon': Icons.traffic},
@@ -44,7 +48,12 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
-    _initializeCamera();
+    if (!DemoConfig.enabled) {
+      _initializeCamera();
+    } else {
+      _isInitialized = true;
+      _gpsAccuracy = DemoConfig.accuracyMeters;
+    }
     _startSensorUpdates();
   }
 
@@ -57,6 +66,10 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
   }
 
   void _startSensorUpdates() {
+    if (DemoConfig.enabled) {
+      _gpsAccuracy = DemoConfig.accuracyMeters;
+      return;
+    }
     double? lastAccuracy;
     _sensorTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       try {
@@ -208,6 +221,83 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
     }
   }
 
+  Future<void> _captureDemoAndUpload() async {
+    if (_isProcessing) return;
+    if (_demoSelectedSample == null) {
+      _showErrorDialog('Pick a sample sky first.');
+      return;
+    }
+
+    setState(() {
+      _isProcessing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      _showProgressDialog('Loading sample photo...');
+
+      final byteData =
+          await rootBundle.load(_demoSelectedSample!.asset);
+      final imageBytes = byteData.buffer.asUint8List(
+        byteData.offsetInBytes,
+        byteData.lengthInBytes,
+      );
+
+      _updateProgressDialog('Compressing image...');
+      final compressedBytes = await _compressImage(imageBytes);
+
+      _updateProgressDialog('Getting upload URL...');
+
+      final authService = AuthService();
+      final apiClient = ApiClient(authService, longTimeout: true);
+      final scanService = ScanService(apiClient);
+
+      final uploadResponse = await scanService.getUploadUrl();
+
+      _updateProgressDialog('Uploading image...');
+
+      await scanService.uploadImage(uploadResponse.uploadUrl, compressedBytes);
+
+      _updateProgressDialog('Processing scan...');
+
+      final submission = ScanSubmission(
+        scanId: uploadResponse.scanId,
+        s3Key: uploadResponse.s3Key,
+        lat: DemoConfig.latitude,
+        lon: DemoConfig.longitude,
+        accuracy: DemoConfig.accuracyMeters,
+        pressure: null,
+        tag: _selectedTag,
+        timestamp: DateTime.now(),
+      );
+
+      final result = await scanService.submitScan(submission);
+
+      Navigator.of(context).pop();
+
+      if (mounted) {
+        notifyMapRefresh();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(result: result),
+          ),
+        );
+      }
+    } on RateLimitException catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog(e.message);
+    } catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog('Failed to process scan: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
+  }
+
   Future<void> _pickFromGalleryAndUpload() async {
     if (_isProcessing) return;
     
@@ -309,6 +399,11 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
   }
 
   Future<Uint8List> _compressImage(Uint8List imageBytes) async {
+    if (kIsWeb) {
+      // flutter_image_compress has no web implementation; the bundled demo
+      // samples are already small, so pass them through unchanged.
+      return imageBytes;
+    }
     final compressed = await FlutterImageCompress.compressWithList(
       imageBytes,
       minWidth: 512,
@@ -384,6 +479,9 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    if (DemoConfig.enabled) {
+      return _buildDemoView();
+    }
     if (_errorMessage != null) {
       return Center(
         child: Padding(
@@ -465,6 +563,259 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDemoView() {
+    final sample = _demoSelectedSample;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: sample == null
+              ? Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFF2A6FDB), Color(0xFF0B1B2B)],
+                    ),
+                  ),
+                )
+              : Image.asset(
+                  sample.asset,
+                  fit: BoxFit.cover,
+                  color: const Color(0xFF0B1B2B).withOpacity(0.25),
+                  colorBlendMode: BlendMode.darken,
+                ),
+        ),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFF0B1B2B).withOpacity(0.55),
+                  Colors.transparent,
+                  const Color(0xFF0B1B2B).withOpacity(0.9),
+                ],
+                stops: const [0.0, 0.35, 1.0],
+              ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFB68C),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.science, size: 14, color: Color(0xFF321200)),
+                      SizedBox(width: 6),
+                      Text(
+                        'Demo mode • sample skies',
+                        style: TextStyle(
+                          color: Color(0xFF321200),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildTopTelemetry(),
+              const Spacer(),
+              _buildDemoControls(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDemoControls() {
+    final sample = _demoSelectedSample;
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B1B2B).withOpacity(0.65),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  sample?.icon ?? Icons.touch_app,
+                  size: 18,
+                  color: const Color(0xFF22C7E8),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    sample == null
+                        ? 'Pick a sample sky below'
+                        : '${sample.label}  •  typical ${sample.aqiHint}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildDemoSampleRow(),
+          const SizedBox(height: 14),
+          _buildDemoShutterButton(),
+          const SizedBox(height: 4),
+          const Text(
+            'Tap to run the real scan pipeline',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDemoSampleRow() {
+    final selected = _demoSelectedSample;
+    return SizedBox(
+      height: 76,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: DemoConfig.samples.length,
+        itemBuilder: (context, index) {
+          final s = DemoConfig.samples[index];
+          final isSelected = selected?.asset == s.asset;
+          return GestureDetector(
+            onTap: () => setState(() => _demoSelectedSample = s),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              margin: const EdgeInsets.only(right: 10),
+              width: 96,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF22C7E8) : Colors.white24,
+                  width: isSelected ? 3 : 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF22C7E8).withOpacity(0.4),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                        )
+                      ]
+                    : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(11),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(s.asset, fit: BoxFit.cover),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        color: Colors.black54,
+                        child: Text(
+                          s.label,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDemoShutterButton() {
+    return GestureDetector(
+      onTap: _isProcessing ? null : _captureDemoAndUpload,
+      child: Container(
+        width: 88,
+        height: 88,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF22C7E8).withOpacity(0.35),
+              blurRadius: 24,
+              spreadRadius: 4,
+            ),
+          ],
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF2A6FDB),
+              shape: BoxShape.circle,
+            ),
+            child: Container(
+              margin: const EdgeInsets.all(9),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF6F9FC),
+                shape: BoxShape.circle,
+              ),
+              child: _isProcessing
+                  ? const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF2A6FDB),
+                        ),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.camera_alt,
+                      color: Color(0xFF2A6FDB),
+                      size: 28,
+                    ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
