@@ -161,20 +161,22 @@ class ScanResult {
 
 class StationInfo {
   final String name;
-  final double distance;
-  final double aqi;
+  final double? distance;
+  final double? aqi;
 
   StationInfo({
     required this.name,
-    required this.distance,
-    required this.aqi,
+    this.distance,
+    this.aqi,
   });
 
   factory StationInfo.fromJson(Map<String, dynamic> json) {
+    final distanceNum = (json['distance'] ?? json['distance_km']) as num?;
+    final aqiNum = json['aqi'] as num?;
     return StationInfo(
-      name: json['name'] as String,
-      distance: (json['distance'] as num).toDouble(),
-      aqi: (json['aqi'] as num).toDouble(),
+      name: (json['name'] ?? json['stationName'] ?? 'Nearby station') as String,
+      distance: distanceNum?.toDouble(),
+      aqi: aqiNum?.toDouble(),
     );
   }
 }

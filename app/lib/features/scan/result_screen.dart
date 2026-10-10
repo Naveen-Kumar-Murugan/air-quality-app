@@ -156,14 +156,18 @@ class ResultScreen extends StatelessWidget {
                       _buildStationRow(
                         context,
                         'Distance',
-                        '${result.station!.distance.toStringAsFixed(1)} km',
+                        result.station!.distance != null
+                            ? '${result.station!.distance!.toStringAsFixed(1)} km'
+                            : '—',
                         Icons.straighten,
                       ),
                       const SizedBox(height: 12),
                       _buildStationRow(
                         context,
                         'Station AQI',
-                        result.station!.aqi.toStringAsFixed(0),
+                        result.station!.aqi != null
+                            ? result.station!.aqi!.toStringAsFixed(0)
+                            : '—',
                         Icons.air,
                       ),
                     ],
