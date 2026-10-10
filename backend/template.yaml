@@ -208,37 +208,37 @@ Resources:
   UploadUrlLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${UploadUrlFunction}"
+      LogGroupName: /aws/lambda/air-quality-app-upload-url
       RetentionInDays: 7
 
   ScanLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${ScanFunction}"
+      LogGroupName: /aws/lambda/air-quality-app-scan
       RetentionInDays: 7
 
   ScansMineLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${ScansMineFunction}"
+      LogGroupName: /aws/lambda/air-quality-app-scans-mine
       RetentionInDays: 7
 
   MapLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${MapFunction}"
+      LogGroupName: /aws/lambda/air-quality-app-map
       RetentionInDays: 7
 
   RouteLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${RouteFunction}"
+      LogGroupName: /aws/lambda/air-quality-app-route
       RetentionInDays: 7
 
   CoachLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${CoachFunction}"
+      LogGroupName: /aws/lambda/air-quality-app-coach
       RetentionInDays: 7
 
   HelloFunction:
@@ -273,6 +273,7 @@ Resources:
   UploadUrlFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: air-quality-app-upload-url
       CodeUri: functions/upload_url/
       Runtime: python3.13
       Handler: app.handler
@@ -303,6 +304,7 @@ Resources:
   ScanFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: air-quality-app-scan
       CodeUri: functions/scan/
       Runtime: python3.13
       Handler: app.handler
@@ -346,6 +348,7 @@ Resources:
   ScansMineFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: air-quality-app-scans-mine
       CodeUri: functions/scans_mine/
       Runtime: python3.13
       Handler: app.handler
@@ -372,6 +375,7 @@ Resources:
   MapFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: air-quality-app-map
       CodeUri: functions/map/
       Runtime: python3.13
       Handler: app.handler
@@ -401,6 +405,7 @@ Resources:
   RouteFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: air-quality-app-route
       CodeUri: functions/route/
       Runtime: python3.13
       Handler: app.lambda_handler
@@ -434,6 +439,7 @@ Resources:
       Dockerfile: Dockerfile
       DockerContext: ./functions/coach
     Properties:
+      FunctionName: air-quality-app-coach
       PackageType: Image
       Architectures:
         - arm64
