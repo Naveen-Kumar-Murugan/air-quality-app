@@ -12,6 +12,7 @@ Globals:
         STATIONS_TABLE: !Ref StationsTable
         RATELIMITS_TABLE: !Ref RateLimitsTable
         SCANS_BUCKET: !Ref ScansBucket
+        HOURLY_SCAN_LIMIT: !Ref HourlyScanLimit
 
 Parameters:
   SageMakerEndpointName:
@@ -32,6 +33,11 @@ Parameters:
       Browser origins allowed by API CORS and the scans-bucket PUT rule (the Amplify
       domain and http://localhost:* for the Flutter web demo). Default "*" keeps the
       demo working before the Amplify domain is known; set it explicitly to lock down.
+
+  HourlyScanLimit:
+    Type: Number
+    Default: 20
+    Description: Max scans per user per hour. Raise for the demo account during rehearsal.
 
 Resources:
   GeoCellsTable:
@@ -123,6 +129,11 @@ Resources:
   ScansBucket:
     Type: AWS::S3::Bucket
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       CorsConfiguration:
         CorsRules:
           - AllowedOrigins: !Ref WebAppOrigins
@@ -138,6 +149,12 @@ Resources:
 
   ModelsBucket:
     Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
 
   UserPool:
     Type: AWS::Cognito::UserPool
@@ -187,6 +204,42 @@ Resources:
         - python3.13
     Metadata:
       BuildMethod: python3.13
+
+  UploadUrlLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${UploadUrlFunction}"
+      RetentionInDays: 7
+
+  ScanLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ScanFunction}"
+      RetentionInDays: 7
+
+  ScansMineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ScansMineFunction}"
+      RetentionInDays: 7
+
+  MapLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${MapFunction}"
+      RetentionInDays: 7
+
+  RouteLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${RouteFunction}"
+      RetentionInDays: 7
+
+  CoachLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CoachFunction}"
+      RetentionInDays: 7
 
   HelloFunction:
     Type: AWS::Serverless::Function
@@ -245,6 +298,7 @@ Resources:
         Variables:
           SCANS_BUCKET: !Ref ScansBucket
           RATE_LIMITS_TABLE: !Ref RateLimitsTable
+          HOURLY_SCAN_LIMIT: !Ref HourlyScanLimit
 
   ScanFunction:
     Type: AWS::Serverless::Function
@@ -399,7 +453,6 @@ Resources:
                 - arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-lite-v1:0
                 - arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0
                 - arn:aws:bedrock:ap-south-1:048834208130:inference-profile/apac.amazon.nova-lite-v1:0
-                - "*"
             - Sid: DynamoDBRead
               Effect: Allow
               Action:

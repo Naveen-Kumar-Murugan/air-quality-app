@@ -26,6 +26,10 @@ def handler(event, context):
 
     logger.info("Processing upload URL request", extra={"user_id": user_id})
     table_name = os.environ.get("RATE_LIMITS_TABLE", "RateLimitsTable")
+    try:
+        hourly_limit = int(os.environ.get("HOURLY_SCAN_LIMIT", "20"))
+    except ValueError:
+        hourly_limit = 20
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(table_name)
 
@@ -44,10 +48,10 @@ def handler(event, context):
             ReturnValues="UPDATED_NEW",
         )
         new_count = int(response["Attributes"].get("count", 1))
-        logger.info("Rate limit check passed", extra={"count": new_count, "limit": 20})
-        if new_count > 20:
+        logger.info("Rate limit check passed", extra={"count": new_count, "limit": hourly_limit})
+        if new_count > hourly_limit:
             logger.warning("Rate limit exceeded", extra={"user_id": user_id, "count": new_count})
-            return error_response("RATE_LIMITED", "Hourly scan limit reached (20 scans/hour)", 429)
+            return error_response("RATE_LIMITED", f"Hourly scan limit reached ({hourly_limit} scans/hour)", 429)
     except Exception as e:
         logger.error("Rate limit check failed", extra={"error": str(e)})
         return error_response("INTERNAL_ERROR", str(e), 500)
