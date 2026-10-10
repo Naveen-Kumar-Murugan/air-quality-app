@@ -195,7 +195,12 @@ class _RouteScreenState extends State<RouteScreen> {
           Expanded(
             child: ListView(
               children: [
-                _card('Fastest', fastest ?? _routeData?.routes.isNotEmpty == true ? _routeData!.routes.first : null),
+                _card(
+                    'Fastest',
+                    fastest ??
+                        (_routeData != null && _routeData!.routes.isNotEmpty
+                            ? _routeData!.routes.first
+                            : null)),
                 _card('Cleanest', cleanest),
                 _card('Balanced', balanced),
               ],
@@ -249,11 +254,13 @@ class _RouteScreenState extends State<RouteScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              center: LatLng(51.5, 0.0),
-              zoom: 13.0,
+              initialCenter: _origin ?? LatLng(51.5, 0.0),
+              initialZoom: 13.0,
               onTap: (tapPosition, point) => _onMapTap(point),
               onLongPress: (tapPosition, point) => _onMapLongPress(point),
-              interactiveFlags: InteractiveFlag.all,
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all,
+              ),
             ),
             children: [
               TileLayer(
@@ -266,7 +273,7 @@ class _RouteScreenState extends State<RouteScreen> {
                   markers: [
                     Marker(
                       point: _origin!,
-                      builder: (ctx) => const Icon(Icons.location_on, color: Colors.green, size: 32),
+                      child: const Icon(Icons.location_on, color: Colors.green, size: 32),
                     ),
                   ],
                 ),
@@ -275,7 +282,7 @@ class _RouteScreenState extends State<RouteScreen> {
                   markers: [
                     Marker(
                       point: _destination!,
-                      builder: (ctx) => const Icon(Icons.flag, color: Colors.red, size: 32),
+                      child: const Icon(Icons.flag, color: Colors.red, size: 32),
                     ),
                   ],
                 ),

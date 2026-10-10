@@ -25,6 +25,14 @@ Parameters:
     NoEcho: true
     Description: Mapbox Directions API access token. Leave blank to rely on the MAPBOX_TOKEN environment variable or local .env file.
 
+  WebAppOrigins:
+    Type: CommaDelimitedList
+    Default: "*"
+    Description: >-
+      Browser origins allowed by API CORS and the scans-bucket PUT rule (the Amplify
+      domain and http://localhost:* for the Flutter web demo). Default "*" keeps the
+      demo working before the Amplify domain is known; set it explicitly to lock down.
+
 Resources:
   GeoCellsTable:
     Type: AWS::DynamoDB::Table
@@ -117,9 +125,10 @@ Resources:
     Properties:
       CorsConfiguration:
         CorsRules:
-          - AllowedOrigins: ["*"]
+          - AllowedOrigins: !Ref WebAppOrigins
             AllowedMethods: [PUT]
             AllowedHeaders: ["*"]
+            ExposedHeaders: [ETag]
             MaxAge: 3000
       LifecycleConfiguration:
         Rules:
@@ -158,9 +167,9 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
-        AllowOrigins: ["*"]
-        AllowMethods: [GET, POST, PUT, DELETE, OPTIONS]
-        AllowHeaders: ["*"]
+        AllowOrigins: !Ref WebAppOrigins
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [Authorization, Content-Type]
       Auth:
         Authorizers:
           CognitoAuthorizer:
