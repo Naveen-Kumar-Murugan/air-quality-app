@@ -205,42 +205,6 @@ Resources:
     Metadata:
       BuildMethod: python3.13
 
-  UploadUrlLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${UploadUrlFunction}"
-      RetentionInDays: 7
-
-  ScanLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${ScanFunction}"
-      RetentionInDays: 7
-
-  ScansMineLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${ScansMineFunction}"
-      RetentionInDays: 7
-
-  MapLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${MapFunction}"
-      RetentionInDays: 7
-
-  RouteLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${RouteFunction}"
-      RetentionInDays: 7
-
-  CoachLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${CoachFunction}"
-      RetentionInDays: 7
-
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:

@@ -225,6 +225,9 @@ def seed_geocells(dynamodb: Any, table_name: str, dry_run: bool = False) -> int:
             BANGALORE_BOUNDS["max_lon"],
             precision,
         )
+        if precision == 7:
+            ordered = sorted(cells)
+            cells = set(ordered[::6])
         
         for cell in cells:
             min_lat, min_lon, max_lat, max_lon = geohash.decode_bbox(cell)
